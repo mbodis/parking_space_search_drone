@@ -5,10 +5,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
@@ -18,7 +18,8 @@ import com.parrot.arsdk.arcontroller.ARControllerCodec;
 import com.parrot.arsdk.arcontroller.ARFrame;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import com.parrot.sdksample.drone.BebopDrone;
-import com.parrot.sdksample.view.BebopVideoView;
+import com.parrot.sdksample.logic.QrCodeFlyAbove;
+import com.parrot.sdksample.view.DrawView;
 import com.parrot.sdksample.view.MyBebopVideoView;
 
 import sk.svb.drone.parking_space.R;
@@ -30,15 +31,18 @@ public class BebopActivity extends AppCompatActivity {
     private ProgressDialog mConnectionProgressDialog;
     private ProgressDialog mDownloadProgressDialog;
 
-//    private BebopVideoView mVideoView;
     private MyBebopVideoView mVideoView;
+    private DrawView myDrawView;
 
-    private TextView mBatteryLabel;
-    private Button mTakeOffLandBt;
-    private Button mDownloadBt;
+    private TextView mBatteryLabel, textViewLog, textViewLabelRoll, textViewLabelYaw;
+    private Button mTakeOffLandBt, mDownloadBt, takePictureBt, gazUpBt, gazDownBt,
+            yawLeftBt, yawRightBt, forwardBt, backBt, rollLeftBt, rollRightBt, cameraDown, cameraCenter;
+    private ScrollView scrollLog;
 
     private int mNbMaxDownload;
     private int mCurrentDownloadIndex;
+
+    public QrCodeFlyAbove mQrCodeFlyAbove;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +57,7 @@ public class BebopActivity extends AppCompatActivity {
         mBebopDrone = new BebopDrone(this, service);
         mBebopDrone.addListener(mBebopListener);
 
+        mQrCodeFlyAbove = new QrCodeFlyAbove(mBebopDrone);
     }
 
     @Override
@@ -60,8 +65,7 @@ public class BebopActivity extends AppCompatActivity {
         super.onStart();
 
         // show a loading view while the bebop drone is connecting
-        if ((mBebopDrone != null) && !(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING.equals(mBebopDrone.getConnectionState())))
-        {
+        if ((mBebopDrone != null) && !(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING.equals(mBebopDrone.getConnectionState()))) {
             mConnectionProgressDialog = new ProgressDialog(this, R.style.AppCompatAlertDialogStyle);
             mConnectionProgressDialog.setIndeterminate(true);
             mConnectionProgressDialog.setMessage("Connecting ...");
@@ -77,8 +81,7 @@ public class BebopActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (mBebopDrone != null)
-        {
+        if (mBebopDrone != null) {
             mConnectionProgressDialog = new ProgressDialog(this, R.style.AppCompatAlertDialogStyle);
             mConnectionProgressDialog.setIndeterminate(true);
             mConnectionProgressDialog.setMessage("Disconnecting ...");
@@ -92,15 +95,55 @@ public class BebopActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onDestroy()
-    {
+    public void onDestroy() {
         mBebopDrone.dispose();
+        mQrCodeFlyAbove.destroy();
         super.onDestroy();
     }
 
     private void initIHM() {
+        myDrawView = (DrawView) findViewById(R.id.myDrawLayer);
+
+        // setup text views
+        textViewLabelRoll = (TextView) findViewById(R.id.textViewLabelRoll);
+        textViewLabelYaw = (TextView) findViewById(R.id.textViewLabelYaw);
+        textViewLog = (TextView) findViewById(R.id.textViewLog);
+        textViewLog.setText("");
+        scrollLog = (ScrollView) findViewById(R.id.scrollLog);
+
         mVideoView = (MyBebopVideoView) findViewById(R.id.videoView);
         mVideoView.setSurfaceTextureListener(mVideoView);
+        mVideoView.setupViews(myDrawView, textViewLog, scrollLog);
+
+
+        // toggle debug mode
+        findViewById(R.id.toggle_btns).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int visibility = (gazUpBt.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
+                int visibilityInverse = (gazUpBt.getVisibility() == View.VISIBLE) ? View.VISIBLE: View.GONE;
+
+                gazUpBt.setVisibility(visibility);
+                gazDownBt.setVisibility(visibility);
+                yawLeftBt.setVisibility(visibility);
+                yawRightBt.setVisibility(visibility);
+                forwardBt.setVisibility(visibility);
+                backBt.setVisibility(visibility);
+                rollLeftBt.setVisibility(visibility);
+                rollRightBt.setVisibility(visibility);
+                mDownloadBt.setVisibility(visibility);
+                takePictureBt.setVisibility(visibility);
+
+                mTakeOffLandBt.setVisibility(visibility);
+                cameraCenter.setVisibility(visibility);
+                cameraDown.setVisibility(visibility);
+
+                textViewLabelRoll.setVisibility(visibility);
+                textViewLabelYaw.setVisibility(visibility);
+
+                textViewLog.setVisibility(visibilityInverse);
+            }
+        });
 
         findViewById(R.id.emergencyBt).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -124,13 +167,14 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.takePictureBt).setOnClickListener(new View.OnClickListener() {
+        takePictureBt = (Button) findViewById(R.id.takePictureBt);
+        takePictureBt.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 mBebopDrone.takePicture();
             }
         });
 
-        mDownloadBt = (Button)findViewById(R.id.downloadBt);
+        mDownloadBt = (Button) findViewById(R.id.downloadBt);
         mDownloadBt.setEnabled(false);
         mDownloadBt.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -150,7 +194,9 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.gazUpBt).setOnTouchListener(new View.OnTouchListener() {
+
+        gazUpBt = (Button) findViewById(R.id.gazUpBt);
+        gazUpBt.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
@@ -173,7 +219,8 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.gazDownBt).setOnTouchListener(new View.OnTouchListener() {
+        gazDownBt = (Button) findViewById(R.id.gazDownBt);
+        gazDownBt.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
@@ -196,7 +243,8 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.yawLeftBt).setOnTouchListener(new View.OnTouchListener() {
+        yawLeftBt = (Button) findViewById(R.id.yawLeftBt);
+        yawLeftBt.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
@@ -219,7 +267,8 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.yawRightBt).setOnTouchListener(new View.OnTouchListener() {
+        yawRightBt = (Button) findViewById(R.id.yawRightBt);
+        yawRightBt.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
@@ -242,7 +291,8 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.forwardBt).setOnTouchListener(new View.OnTouchListener() {
+        forwardBt = (Button) findViewById(R.id.forwardBt);
+        forwardBt.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
@@ -267,7 +317,8 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.backBt).setOnTouchListener(new View.OnTouchListener() {
+        backBt = (Button) findViewById(R.id.backBt);
+        backBt.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
@@ -292,7 +343,8 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.rollLeftBt).setOnTouchListener(new View.OnTouchListener() {
+        rollLeftBt = (Button) findViewById(R.id.rollLeftBt);
+        rollLeftBt.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
@@ -317,7 +369,8 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.rollRightBt).setOnTouchListener(new View.OnTouchListener() {
+        rollRightBt = (Button) findViewById(R.id.rollRightBt);
+        rollRightBt.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
@@ -345,14 +398,15 @@ public class BebopActivity extends AppCompatActivity {
         mBatteryLabel = (TextView) findViewById(R.id.batteryLabel);
     }
 
-    private void initSvbLayout(){
-        findViewById(R.id.camera_down).setOnTouchListener(new View.OnTouchListener() {
+    private void initSvbLayout() {
+        cameraDown = (Button) findViewById(R.id.camera_down);
+        cameraDown.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         v.setPressed(true);
-                        mBebopDrone.setCameraOrientationV2((byte)-100, (byte)0);
+                        mBebopDrone.setCameraOrientationV2((byte) -100, (byte) 0);
                         break;
 
                     case MotionEvent.ACTION_UP:
@@ -367,13 +421,15 @@ public class BebopActivity extends AppCompatActivity {
                 return true;
             }
         });
-        findViewById(R.id.camera_center).setOnTouchListener(new View.OnTouchListener() {
+
+        cameraCenter = (Button) findViewById(R.id.camera_center);
+        cameraCenter.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         v.setPressed(true);
-                        mBebopDrone.setCameraOrientationV2((byte)0, (byte)0);
+                        mBebopDrone.setCameraOrientationV2((byte) 0, (byte) 0);
                         break;
 
                     case MotionEvent.ACTION_UP:
@@ -393,8 +449,7 @@ public class BebopActivity extends AppCompatActivity {
     private final BebopDrone.Listener mBebopListener = new BebopDrone.Listener() {
         @Override
         public void onDroneConnectionChanged(ARCONTROLLER_DEVICE_STATE_ENUM state) {
-            switch (state)
-            {
+            switch (state) {
                 case ARCONTROLLER_DEVICE_STATE_RUNNING:
                     mConnectionProgressDialog.dismiss();
                     break;
@@ -437,18 +492,18 @@ public class BebopActivity extends AppCompatActivity {
 
         @Override
         public void onPictureTaken(ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
-            Log.i(TAG, "Picture has been taken");
+            //Log.i(TAG, "Picture has been taken");
         }
 
         @Override
         public void configureDecoder(ARControllerCodec codec) {
-            Log.i(TAG, "configureDecoder");
+            //Log.i(TAG, "configureDecoder");
             mVideoView.configureDecoder(codec);
         }
 
         @Override
         public void onFrameReceived(ARFrame frame) {
-            Log.i(TAG, "onFrameReceived");
+            //Log.i(TAG, "onFrameReceived");
             mVideoView.displayFrame(frame);
         }
 

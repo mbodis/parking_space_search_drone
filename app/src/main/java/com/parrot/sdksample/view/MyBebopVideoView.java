@@ -1,6 +1,10 @@
 package com.parrot.sdksample.view;
 
     import android.graphics.Bitmap;
+    import android.graphics.Canvas;
+    import android.graphics.Paint;
+    import android.graphics.Point;
+    import android.graphics.Rect;
     import android.media.MediaExtractor;
     import android.content.Context;
     import android.graphics.Bitmap;
@@ -10,22 +14,35 @@ package com.parrot.sdksample.view;
     import android.media.Image;
     import android.media.MediaCodec;
     import android.media.MediaFormat;
+    import android.os.AsyncTask;
     import android.util.AttributeSet;
     import android.util.Log;
+    import android.util.SparseArray;
     import android.view.Surface;
     import android.view.SurfaceHolder;
     import android.view.SurfaceView;
     import android.view.TextureView;
+    import android.view.View;
+    import android.widget.ScrollView;
+    import android.widget.TextView;
 
+    import com.google.android.gms.vision.Frame;
+    import com.google.android.gms.vision.barcode.Barcode;
+    import com.google.android.gms.vision.barcode.BarcodeDetector;
     import com.parrot.arsdk.arcontroller.ARCONTROLLER_STREAM_CODEC_TYPE_ENUM;
     import com.parrot.arsdk.arcontroller.ARControllerCodec;
     import com.parrot.arsdk.arcontroller.ARFrame;
+    import com.parrot.sdksample.activity.BebopActivity;
+    import com.parrot.sdksample.model.MyBarcode;
     import com.parrot.sdksample.utils.ImageUtils;
 
     //import org.opencv.core.Mat;
 
     import java.io.IOException;
     import java.nio.ByteBuffer;
+    import java.text.DateFormat;
+    import java.text.SimpleDateFormat;
+    import java.util.Date;
     import java.util.UUID;
     import java.util.concurrent.locks.Lock;
     import java.util.concurrent.locks.ReentrantLock;
@@ -55,12 +72,28 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
     private ByteBuffer[] mBuffers;
     Surface surface;
 
-    private static final int VIDEO_WIDTH = 640;
-    private static final int VIDEO_HEIGHT = 368;
+    public static final int VIDEO_WIDTH = 640;
+    public static final int VIDEO_HEIGHT = 368;
+
+    // svb
+    Bitmap bmp;
+    Canvas mCanvas;
+    Paint redPaint;
+    DrawView drawLayer;
+    TextView textViewLog;
+    ScrollView scrollLog;
+    AsyncImageAnalyse mAsyncImageAnalyse;
+    boolean imageIsProcessing = false;
+
 
     public byte[] a;
-//    public Mat k;
-    int i = 0;
+    //    public Mat k;
+
+    public void setupViews(DrawView drawLayer, TextView textViewLog, ScrollView scrollLog){
+        this.drawLayer = drawLayer;
+        this.textViewLog = textViewLog;
+        this.scrollLog = scrollLog;
+    }
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height)
@@ -110,6 +143,10 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
     private void customInit() {
         setSurfaceTextureListener(this);
         mReadyLock = new ReentrantLock();
+        bmp = Bitmap.createBitmap(640, 368, Bitmap.Config.ARGB_8888);
+        redPaint = new Paint();
+        redPaint.setColor(0xffff0000);
+        redPaint.setStrokeWidth(3);
 //        getHolder().addCallback(this);
     }
 
@@ -164,16 +201,10 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
                 Log.e(TAG, "Error while dequeue input buffer (outIndex)");
             }
         }
-        i++;
-        Log.d(TAG , "i: " + i);
-        if (i == 200) {
-            Bitmap bmp = Bitmap.createBitmap(640, 368, Bitmap.Config.ARGB_8888);
-            this.getBitmap(bmp);
-            String uuid = UUID.randomUUID().toString();
-            boolean res = ImageUtils.saveBitmapToSdCard(getContext(), bmp, uuid);
-            Log.d(TAG , "res: " + res);
 
-//            DroneVideo.SaveImage(bmp);
+        if (!imageIsProcessing) {
+            this.getBitmap(bmp);
+            analyseImage();
         }
 
         mReadyLock.unlock();
@@ -207,7 +238,6 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
     12-26 17:20:58.729 22819-25389/com.i3rivale.droneapp D/BebopVideoView:
     inputimage={height=368, width=640, mime=video/avc, adaptive-playback=1}
     * */
-
     private void configureMediaCodec() {
         mMediaCodec.stop();//?
         MediaFormat format = MediaFormat.createVideoFormat(VIDEO_MIME_TYPE, VIDEO_WIDTH, VIDEO_HEIGHT);
@@ -245,6 +275,89 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
             mIsCodecConfigured = false;
             mMediaCodec = null;
         }
+    }
+
+    private void analyseImage(){
+        if (!imageIsProcessing){
+            imageIsProcessing = true;
+            mAsyncImageAnalyse = new AsyncImageAnalyse();
+            mAsyncImageAnalyse.c = getContext();
+            mAsyncImageAnalyse.execute(bmp);
+        }
+
+    }
+
+    /**
+     * async image preprocessing
+     */
+    private class AsyncImageAnalyse extends
+            AsyncTask<Bitmap, Void, Barcode> {
+
+        Context c;
+        BarcodeDetector detector;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            detector = new BarcodeDetector.Builder(c)
+                    .setBarcodeFormats(Barcode.DATA_MATRIX | Barcode.QR_CODE)
+                    .build();
+        }
+
+        @Override
+        protected Barcode doInBackground(
+                Bitmap... params) {
+
+            Barcode barcode = null;
+            if (detector.isOperational()) {
+                //Log.d(TAG, "detector is Operational");
+                Frame frame = new Frame.Builder().setBitmap(params[0]).build();
+                SparseArray<Barcode> barcodes = detector.detect(frame);
+
+                Log.d(TAG, "barcodes.size: " + barcodes.size());
+                if (barcodes.size() > 0){
+                    barcode = barcodes.valueAt(0);
+//                    new MyBarcode(barcodes.get(0).getBoundingBox(), barcodes.get(0).cornerPoints);
+                }
+//                for (int index = 0; index < barcodes.size(); index++) {
+//                    Barcode code = barcodes.valueAt(index);
+//                    p = code.cornerPoints;
+//                }
+            }else{
+                Log.d(TAG, "detector is NOT Operational");
+            }
+            return barcode;
+        }
+
+        @Override
+        protected void onPostExecute(Barcode barcode) {
+            Log.d(TAG, "barcode: " + ((barcode == null) ? " IS NULL " : " IS NOT NULL "));
+            if(barcode != null){
+                addTextLog((barcode == null) ? "QR code detected" : "QR code NOT detected");
+
+                drawLayer.setBitmap(bmp);
+                drawLayer.setQrCodePoints(barcode.cornerPoints);
+                drawLayer.setPointsTs(System.currentTimeMillis());
+
+                ((BebopActivity)getContext()).mQrCodeFlyAbove.setCenterQr(new Point(barcode.getBoundingBox().centerX(), barcode.getBoundingBox().centerY()));
+                ((BebopActivity)getContext()).mQrCodeFlyAbove.setLastTsQrCode(System.currentTimeMillis());
+            }
+            drawLayer.toggleDrawView();
+            drawLayer.invalidate();
+            imageIsProcessing = false;
+        }
+    }
+
+    private void addTextLog(String msg){
+        String date = new SimpleDateFormat("HH:mm:ss").format(new Date());
+        textViewLog.append(date + " " + msg + "\n");
+        scrollLog.scrollTo(0, 999999);
+        Log.d(TAG, msg);
+    }
+
+    static void saveImageToFile(Context c, Bitmap bmp){
+        String uuid = UUID.randomUUID().toString();
+        boolean res = ImageUtils.saveBitmapToSdCard(c, bmp, uuid);
     }
 
 }

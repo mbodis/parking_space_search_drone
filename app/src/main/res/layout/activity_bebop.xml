@@ -10,6 +10,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <com.parrot.sdksample.view.DrawView
+        android:id="@+id/myDrawLayer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <Button
         android:id="@+id/emergencyBt"
         android:layout_width="wrap_content"
@@ -146,7 +151,7 @@
         android:textColor="#ff0000" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/textViewLabelRoll"
         android:layout_width="110dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -159,7 +164,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/textViewLabelYaw"
         android:layout_width="110dp"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/gazDownBt"
@@ -170,25 +175,44 @@
         android:text="yaw"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <LinearLayout
+    <Button
+        android:id="@+id/camera_center"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="camera center" />
 
+    <Button
+        android:id="@+id/camera_down"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="camera down" />
 
-        <Button
-            android:id="@+id/camera_down"
-            android:layout_width="wrap_content"
+    <Button
+        android:id="@+id/toggle_btns"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Toggle Btns" />
+
+    <ScrollView
+        android:id="@+id/scrollLog"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true">
+
+        <TextView
+            android:id="@+id/textViewLog"
+            android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:text="camera down" />
+            android:background="@android:color/black"
+            android:text="TextView"
+            android:textColor="@android:color/white"
+            android:visibility="gone" />
+    </ScrollView>
 
-        <Button
-            android:id="@+id/camera_center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:text="camera center" />
-    </LinearLayout>
 </RelativeLayout>
