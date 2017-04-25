@@ -1,10 +1,14 @@
 package com.parrot.sdksample.activity;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -22,6 +26,9 @@ import com.parrot.sdksample.logic.QrCodeFlyAbove;
 import com.parrot.sdksample.view.DrawView;
 import com.parrot.sdksample.view.MyBebopVideoView;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import sk.svb.drone.parking_space.R;
 
 public class BebopActivity extends AppCompatActivity {
@@ -36,13 +43,24 @@ public class BebopActivity extends AppCompatActivity {
 
     private TextView mBatteryLabel, textViewLog, textViewLabelRoll, textViewLabelYaw;
     private Button mTakeOffLandBt, mDownloadBt, takePictureBt, gazUpBt, gazDownBt,
-            yawLeftBt, yawRightBt, forwardBt, backBt, rollLeftBt, rollRightBt, cameraDown, cameraCenter;
+            yawLeftBt, yawRightBt, forwardBt, backBt, rollLeftBt, rollRightBt, cameraDown, cameraCenter, toggleLog;
     private ScrollView scrollLog;
 
     private int mNbMaxDownload;
     private int mCurrentDownloadIndex;
 
     public QrCodeFlyAbove mQrCodeFlyAbove;
+
+    BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null){
+                if (intent.hasExtra("msg")){
+                    addTextLog(intent.getStringExtra("msg"));
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +75,13 @@ public class BebopActivity extends AppCompatActivity {
         mBebopDrone = new BebopDrone(this, service);
         mBebopDrone.addListener(mBebopListener);
 
-        mQrCodeFlyAbove = new QrCodeFlyAbove(mBebopDrone);
+        mQrCodeFlyAbove = new QrCodeFlyAbove(mBebopDrone, getApplicationContext());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(mBroadcastReceiver, new IntentFilter(TAG));
     }
 
     @Override
@@ -98,6 +122,7 @@ public class BebopActivity extends AppCompatActivity {
     public void onDestroy() {
         mBebopDrone.dispose();
         mQrCodeFlyAbove.destroy();
+        unregisterReceiver(mBroadcastReceiver);
         super.onDestroy();
     }
 
@@ -115,9 +140,18 @@ public class BebopActivity extends AppCompatActivity {
         mVideoView.setSurfaceTextureListener(mVideoView);
         mVideoView.setupViews(myDrawView, textViewLog, scrollLog);
 
+        toggleLog = (Button) findViewById(R.id.toggleLog);
+        toggleLog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int visibility = (textViewLog.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
+                textViewLog.setVisibility(visibility);
+            }
+        });
+
 
         // toggle debug mode
-        findViewById(R.id.toggle_btns).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.toggleBtns).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int visibility = (gazUpBt.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
@@ -141,7 +175,7 @@ public class BebopActivity extends AppCompatActivity {
                 textViewLabelRoll.setVisibility(visibility);
                 textViewLabelYaw.setVisibility(visibility);
 
-                textViewLog.setVisibility(visibilityInverse);
+                toggleLog.setVisibility(visibilityInverse);
             }
         });
 
@@ -399,7 +433,7 @@ public class BebopActivity extends AppCompatActivity {
     }
 
     private void initSvbLayout() {
-        cameraDown = (Button) findViewById(R.id.camera_down);
+        cameraDown = (Button) findViewById(R.id.cameraDown);
         cameraDown.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -422,7 +456,7 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
-        cameraCenter = (Button) findViewById(R.id.camera_center);
+        cameraCenter = (Button) findViewById(R.id.cameraCenter);
         cameraCenter.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -549,4 +583,17 @@ public class BebopActivity extends AppCompatActivity {
             }
         }
     };
+
+    public static final void addTextLogIntent(Context ctx, String msg){
+        Intent mIntent = new Intent(TAG);
+        mIntent.putExtra("msg", msg);
+        ctx.sendBroadcast(mIntent);
+    }
+
+    private void addTextLog(String msg){
+        String date = new SimpleDateFormat("HH:mm:ss").format(new Date());
+        textViewLog.append(date + " " + msg + "\n");
+        scrollLog.scrollTo(0, 999999);
+        Log.d(TAG, msg);
+    }
 }

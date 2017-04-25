@@ -1,51 +1,40 @@
 package com.parrot.sdksample.view;
 
-    import android.graphics.Bitmap;
-    import android.graphics.Canvas;
-    import android.graphics.Paint;
-    import android.graphics.Point;
-    import android.graphics.Rect;
-    import android.media.MediaExtractor;
     import android.content.Context;
-    import android.graphics.Bitmap;
-    import android.graphics.BitmapFactory;
-    import android.graphics.SurfaceTexture;
-    import android.opengl.EGLSurface;
-    import android.media.Image;
-    import android.media.MediaCodec;
-    import android.media.MediaFormat;
-    import android.os.AsyncTask;
-    import android.util.AttributeSet;
-    import android.util.Log;
-    import android.util.SparseArray;
-    import android.view.Surface;
-    import android.view.SurfaceHolder;
-    import android.view.SurfaceView;
-    import android.view.TextureView;
-    import android.view.View;
-    import android.widget.ScrollView;
-    import android.widget.TextView;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Point;
+import android.graphics.SurfaceTexture;
+import android.media.MediaCodec;
+import android.media.MediaFormat;
+import android.os.AsyncTask;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.util.SparseArray;
+import android.view.Surface;
+import android.view.TextureView;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
-    import com.google.android.gms.vision.Frame;
-    import com.google.android.gms.vision.barcode.Barcode;
-    import com.google.android.gms.vision.barcode.BarcodeDetector;
-    import com.parrot.arsdk.arcontroller.ARCONTROLLER_STREAM_CODEC_TYPE_ENUM;
-    import com.parrot.arsdk.arcontroller.ARControllerCodec;
-    import com.parrot.arsdk.arcontroller.ARFrame;
-    import com.parrot.sdksample.activity.BebopActivity;
-    import com.parrot.sdksample.model.MyBarcode;
-    import com.parrot.sdksample.utils.ImageUtils;
+import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.barcode.Barcode;
+import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.parrot.arsdk.arcontroller.ARCONTROLLER_STREAM_CODEC_TYPE_ENUM;
+import com.parrot.arsdk.arcontroller.ARControllerCodec;
+import com.parrot.arsdk.arcontroller.ARFrame;
+import com.parrot.sdksample.activity.BebopActivity;
+import com.parrot.sdksample.utils.ImageUtils;
 
-    //import org.opencv.core.Mat;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.UUID;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-    import java.io.IOException;
-    import java.nio.ByteBuffer;
-    import java.text.DateFormat;
-    import java.text.SimpleDateFormat;
-    import java.util.Date;
-    import java.util.UUID;
-    import java.util.concurrent.locks.Lock;
-    import java.util.concurrent.locks.ReentrantLock;
+//import org.opencv.core.Mat;
 /**
  * Created by mbodis on 4/21/17.
  */
@@ -333,7 +322,7 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
         protected void onPostExecute(Barcode barcode) {
             Log.d(TAG, "barcode: " + ((barcode == null) ? " IS NULL " : " IS NOT NULL "));
             if(barcode != null){
-                addTextLog((barcode == null) ? "QR code detected" : "QR code NOT detected");
+                //BebopActivity.addTextLogIntent(getContext(), "QR code detected");
 
                 drawLayer.setBitmap(bmp);
                 drawLayer.setQrCodePoints(barcode.cornerPoints);
@@ -346,13 +335,6 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
             drawLayer.invalidate();
             imageIsProcessing = false;
         }
-    }
-
-    private void addTextLog(String msg){
-        String date = new SimpleDateFormat("HH:mm:ss").format(new Date());
-        textViewLog.append(date + " " + msg + "\n");
-        scrollLog.scrollTo(0, 999999);
-        Log.d(TAG, msg);
     }
 
     static void saveImageToFile(Context c, Bitmap bmp){
