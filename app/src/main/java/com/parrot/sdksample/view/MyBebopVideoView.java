@@ -303,7 +303,7 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
                 Frame frame = new Frame.Builder().setBitmap(params[0]).build();
                 SparseArray<Barcode> barcodes = detector.detect(frame);
 
-                Log.d(TAG, "barcodes.size: " + barcodes.size());
+                //Log.d(TAG, "barcodes.size: " + barcodes.size());
                 if (barcodes.size() > 0){
                     barcode = barcodes.valueAt(0);
 //                    new MyBarcode(barcodes.get(0).getBoundingBox(), barcodes.get(0).cornerPoints);
@@ -313,14 +313,14 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
 //                    p = code.cornerPoints;
 //                }
             }else{
-                Log.d(TAG, "detector is NOT Operational");
+                //Log.d(TAG, "detector is NOT Operational");
             }
             return barcode;
         }
 
         @Override
         protected void onPostExecute(Barcode barcode) {
-            Log.d(TAG, "barcode: " + ((barcode == null) ? " IS NULL " : " IS NOT NULL "));
+            //Log.d(TAG, "barcode: " + ((barcode == null) ? " IS NULL " : " IS NOT NULL "));
             if(barcode != null){
                 //BebopActivity.addTextLogIntent(getContext(), "QR code detected");
 
@@ -329,6 +329,7 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
                 drawLayer.setPointsTs(System.currentTimeMillis());
 
                 ((BebopActivity)getContext()).mQrCodeFlyAbove.setCenterQr(new Point(barcode.getBoundingBox().centerX(), barcode.getBoundingBox().centerY()));
+                ((BebopActivity)getContext()).mQrCodeFlyAbove.setPointsCenterQr(barcode.cornerPoints);
                 ((BebopActivity)getContext()).mQrCodeFlyAbove.setLastTsQrCode(System.currentTimeMillis());
             }
             drawLayer.toggleDrawView();

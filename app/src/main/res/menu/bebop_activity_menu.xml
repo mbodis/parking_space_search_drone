@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_view_control"
+        android:title="control" />
+    <item
+        android:id="@+id/menu_view_control2"
+        android:title="control 2" />
+    <item
+        android:id="@+id/menu_view_log"
+        android:title="log" />
+    <item
+        android:id="@+id/menu_view_drone_stream"
+        android:title="dron camera" />
+
+</menu>

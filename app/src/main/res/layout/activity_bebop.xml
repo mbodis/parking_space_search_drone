@@ -3,7 +3,7 @@
     android:id="@+id/piloting_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.BebopActivity">
+    tools:context="com.parrot.sdksample.activity.BebopActivity">
 
     <com.parrot.sdksample.view.MyBebopVideoView
         android:id="@+id/videoView"
@@ -169,7 +169,6 @@
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/gazDownBt"
         android:layout_alignRight="@+id/gazDownBt"
-        android:layout_alignTop="@+id/textView2"
         android:width="50dp"
         android:gravity="center_horizontal"
         android:text="yaw"
@@ -191,22 +190,39 @@
         android:layout_alignParentLeft="true"
         android:text="camera down" />
 
-    <Button
-        android:id="@+id/toggleLog"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:visibility="gone"
-        android:layout_alignParentLeft="true"
-        android:text="log" />
 
-    <Button
-        android:id="@+id/toggleBtns"
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Toggle Btns" />
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/parkPhase1Btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="8dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:text="phase1: land on qr code" />
 
+        <Button
+            android:id="@+id/parkPhase2Btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="8dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:text="phase2: go up/down, land on qr code" />
+
+        <Button
+            android:id="@+id/parkPhase3Btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="8dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:text="phase3: go up/down, search qr code, land on qr code" />
+    </LinearLayout>
+    
     <ScrollView
         android:id="@+id/scrollLog"
         android:layout_width="300dp"

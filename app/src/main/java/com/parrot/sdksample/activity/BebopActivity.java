@@ -9,11 +9,15 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
@@ -31,6 +35,8 @@ import java.util.Date;
 
 import sk.svb.drone.parking_space.R;
 
+import static com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED;
+
 public class BebopActivity extends AppCompatActivity {
     private static final String TAG = "BebopActivity";
     private BebopDrone mBebopDrone;
@@ -43,7 +49,8 @@ public class BebopActivity extends AppCompatActivity {
 
     private TextView mBatteryLabel, textViewLog, textViewLabelRoll, textViewLabelYaw;
     private Button mTakeOffLandBt, mDownloadBt, takePictureBt, gazUpBt, gazDownBt,
-            yawLeftBt, yawRightBt, forwardBt, backBt, rollLeftBt, rollRightBt, cameraDown, cameraCenter, toggleLog;
+            yawLeftBt, yawRightBt, forwardBt, backBt, rollLeftBt, rollRightBt, cameraDown,
+            cameraCenter, parkPhase1Btn, parkPhase2Btn, parkPhase3Btn;
     private ScrollView scrollLog;
 
     private int mNbMaxDownload;
@@ -67,8 +74,11 @@ public class BebopActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bebop);
 
+
         initIHM();
-        initSvbLayout();
+        toggleViewControl(View.VISIBLE);
+        toggleViewControl2(View.GONE);
+        toggleViewLog(View.GONE);
 
         Intent intent = getIntent();
         ARDiscoveryDeviceService service = intent.getParcelableExtra(DeviceListActivity.EXTRA_DEVICE_SERVICE);
@@ -119,11 +129,77 @@ public class BebopActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.bebop_activity_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.menu_view_control:
+                toggleViewControl(View.VISIBLE);
+                toggleViewControl2(View.GONE);
+                toggleViewLog(View.GONE);
+                break;
+
+            case R.id.menu_view_control2:
+                toggleViewControl(View.GONE);
+                toggleViewControl2(View.VISIBLE);
+                toggleViewLog(View.GONE);
+                break;
+
+            case R.id.menu_view_log:
+                toggleViewControl(View.GONE);
+                toggleViewControl2(View.GONE);
+                toggleViewLog(View.VISIBLE);
+                break;
+
+            case R.id.menu_view_drone_stream:
+                toggleViewControl(View.GONE);
+                toggleViewControl2(View.GONE);
+                toggleViewLog(View.GONE);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onDestroy() {
         mBebopDrone.dispose();
         mQrCodeFlyAbove.destroy();
         unregisterReceiver(mBroadcastReceiver);
         super.onDestroy();
+    }
+
+    private void toggleViewControl(int visibility){
+        gazUpBt.setVisibility(visibility);
+        gazDownBt.setVisibility(visibility);
+        yawLeftBt.setVisibility(visibility);
+        yawRightBt.setVisibility(visibility);
+        forwardBt.setVisibility(visibility);
+        backBt.setVisibility(visibility);
+        rollLeftBt.setVisibility(visibility);
+        rollRightBt.setVisibility(visibility);
+        mDownloadBt.setVisibility(visibility);
+        takePictureBt.setVisibility(visibility);
+
+        mTakeOffLandBt.setVisibility(visibility);
+        cameraCenter.setVisibility(visibility);
+        cameraDown.setVisibility(visibility);
+
+        textViewLabelRoll.setVisibility(visibility);
+        textViewLabelYaw.setVisibility(visibility);
+    }
+    private void toggleViewControl2(int visibility){
+        parkPhase1Btn.setVisibility(visibility);
+        parkPhase2Btn.setVisibility(visibility);
+        parkPhase3Btn.setVisibility(visibility);
+    }
+
+    private void toggleViewLog(int visibility){
+        textViewLog.setVisibility(visibility);
     }
 
     private void initIHM() {
@@ -139,45 +215,6 @@ public class BebopActivity extends AppCompatActivity {
         mVideoView = (MyBebopVideoView) findViewById(R.id.videoView);
         mVideoView.setSurfaceTextureListener(mVideoView);
         mVideoView.setupViews(myDrawView, textViewLog, scrollLog);
-
-        toggleLog = (Button) findViewById(R.id.toggleLog);
-        toggleLog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int visibility = (textViewLog.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
-                textViewLog.setVisibility(visibility);
-            }
-        });
-
-
-        // toggle debug mode
-        findViewById(R.id.toggleBtns).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                int visibility = (gazUpBt.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
-                int visibilityInverse = (gazUpBt.getVisibility() == View.VISIBLE) ? View.VISIBLE: View.GONE;
-
-                gazUpBt.setVisibility(visibility);
-                gazDownBt.setVisibility(visibility);
-                yawLeftBt.setVisibility(visibility);
-                yawRightBt.setVisibility(visibility);
-                forwardBt.setVisibility(visibility);
-                backBt.setVisibility(visibility);
-                rollLeftBt.setVisibility(visibility);
-                rollRightBt.setVisibility(visibility);
-                mDownloadBt.setVisibility(visibility);
-                takePictureBt.setVisibility(visibility);
-
-                mTakeOffLandBt.setVisibility(visibility);
-                cameraCenter.setVisibility(visibility);
-                cameraDown.setVisibility(visibility);
-
-                textViewLabelRoll.setVisibility(visibility);
-                textViewLabelYaw.setVisibility(visibility);
-
-                toggleLog.setVisibility(visibilityInverse);
-            }
-        });
 
         findViewById(R.id.emergencyBt).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -429,10 +466,6 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
-        mBatteryLabel = (TextView) findViewById(R.id.batteryLabel);
-    }
-
-    private void initSvbLayout() {
         cameraDown = (Button) findViewById(R.id.cameraDown);
         cameraDown.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -478,6 +511,29 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
+        mBatteryLabel = (TextView) findViewById(R.id.batteryLabel);
+
+        parkPhase1Btn = ((Button) findViewById(R.id.parkPhase1Btn));
+        parkPhase1Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                launchPhase1();
+            }
+        });
+        parkPhase2Btn = ((Button) findViewById(R.id.parkPhase2Btn));
+        parkPhase2Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                launchPhase2();
+            }
+        });
+        parkPhase3Btn = ((Button) findViewById(R.id.parkPhase3Btn));
+        parkPhase3Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                launchPhase3();
+            }
+        });
     }
 
     private final BebopDrone.Listener mBebopListener = new BebopDrone.Listener() {
@@ -582,6 +638,12 @@ public class BebopActivity extends AppCompatActivity {
                 mDownloadProgressDialog = null;
             }
         }
+
+        @Override
+        public void onGpsChanged(double lat, double lng, double alt) {
+            //TODO
+
+        }
     };
 
     public static final void addTextLogIntent(Context ctx, String msg){
@@ -595,5 +657,34 @@ public class BebopActivity extends AppCompatActivity {
         textViewLog.append(date + " " + msg + "\n");
         scrollLog.scrollTo(0, 999999);
         Log.d(TAG, msg);
+    }
+
+    /**
+     * 1) camera down
+     * 2) take off
+     * 3) algorithm will try to land
+     */
+    private void launchPhase1(){
+        mBebopDrone.setCameraOrientationV2((byte) -100, (byte) 0);
+        if (mBebopDrone.getFlyingState() == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED) {
+            mBebopDrone.takeOff();
+        }else{
+            Toast.makeText(getApplicationContext(), "invalid flight state, cannot takeOff", Toast.LENGTH_LONG).show();
+        }
+        mQrCodeFlyAbove.setLandingToQrCodeEnabled(true);
+    }
+
+    /**
+     * TODO
+     */
+    private void launchPhase2(){
+        Toast.makeText(getApplicationContext(), "phase 2", Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * TODO
+     */
+    private void launchPhase3(){
+        Toast.makeText(getApplicationContext(), "phase 3", Toast.LENGTH_LONG).show();
     }
 }

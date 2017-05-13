@@ -22,40 +22,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.parrot.sdksample.activity.UsbAccessoryActivityImpl"
-            android:theme="@android:style/Theme.NoDisplay"
-            android:noHistory="true"
-            android:taskAffinity="com.parrot.sdk.usb">
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
-            </intent-filter>
-            <meta-data
-                android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
-                android:resource="@xml/usb_accessory_filter" />
-        </activity>
         <activity
             android:name="com.parrot.sdksample.activity.BebopActivity"
             android:screenOrientation="landscape"/>
 
-        <activity
-            android:name="com.parrot.sdksample.activity.SkyControllerActivity"
-            android:screenOrientation="landscape"/>
-
-        <activity
-            android:name="com.parrot.sdksample.activity.SkyController2Activity"
-            android:screenOrientation="landscape"/>
-
-        <activity
-            android:name="com.parrot.sdksample.activity.JSActivity"
-            android:screenOrientation="landscape"/>
-
-        <activity
-            android:name="com.parrot.sdksample.activity.MiniDroneActivity"
-            android:screenOrientation="landscape"/>
-
-        <activity
-            android:name="com.parrot.sdksample.activity.SwingDroneActivity"
-            android:screenOrientation="landscape"/>
     </application>
 
 </manifest>
