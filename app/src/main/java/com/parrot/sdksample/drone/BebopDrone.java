@@ -592,10 +592,6 @@ public class BebopDrone {
         public void onFrameTimeout(ARDeviceController deviceController) {}
     };
 
-    /**
-     SVB
-     */
-
     public void setCameraOrientationV2(byte tilt, byte pan) {
         if ((mDeviceController != null) && (mState.equals(ARCONTROLLER_DEVICE_STATE_ENUM.ARCONTROLLER_DEVICE_STATE_RUNNING))) {
             mDeviceController.getFeatureARDrone3().setCameraOrientationV2(tilt, pan);

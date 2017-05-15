@@ -5,12 +5,12 @@
     android:layout_height="match_parent"
     tools:context="com.parrot.sdksample.activity.BebopActivity">
 
-    <com.parrot.sdksample.view.MyBebopVideoView
+    <com.parrot.sdksample.view.BebopVideoView
         android:id="@+id/videoView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.parrot.sdksample.view.DrawView
+    <com.parrot.sdksample.view.LandingPatternLayerView
         android:id="@+id/myDrawLayer"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -225,14 +225,14 @@
     
     <ScrollView
         android:id="@+id/scrollLog"
-        android:layout_width="300dp"
+        android:layout_width="450dp"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true">
 
         <TextView
             android:id="@+id/textViewLog"
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/black"
             android:text="TextView"

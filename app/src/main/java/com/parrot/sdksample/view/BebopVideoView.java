@@ -2,36 +2,26 @@ package com.parrot.sdksample.view;
 
     import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.SurfaceTexture;
+    import android.graphics.SurfaceTexture;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.SparseArray;
-import android.view.Surface;
+    import android.view.Surface;
 import android.view.TextureView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.google.android.gms.vision.Frame;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.parrot.arsdk.arcontroller.ARCONTROLLER_STREAM_CODEC_TYPE_ENUM;
+    import com.parrot.arsdk.arcontroller.ARCONTROLLER_STREAM_CODEC_TYPE_ENUM;
 import com.parrot.arsdk.arcontroller.ARControllerCodec;
 import com.parrot.arsdk.arcontroller.ARFrame;
-import com.parrot.sdksample.activity.BebopActivity;
-import com.parrot.sdksample.utils.ImageUtils;
+    import com.parrot.sdksample.models.iface.LandingAreaDetector;
+    import com.parrot.sdksample.models.qr_code.detector.QrCodeDetector;
 
-import java.io.IOException;
+    import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
-import java.util.concurrent.locks.Lock;
+    import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 //import org.opencv.core.Mat;
@@ -43,7 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
     helpful source:
     http://forum.developer.parrot.com/t/bebopvideoview-to-mat/3064/26
  */
-public class MyBebopVideoView extends TextureView implements TextureView.SurfaceTextureListener{
+public class BebopVideoView extends TextureView implements TextureView.SurfaceTextureListener{
 
     private static final String TAG = "BebopVideoView";
     private static final String VIDEO_MIME_TYPE = "video/avc";
@@ -66,19 +56,13 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
 
     // svb
     Bitmap bmp;
-    Canvas mCanvas;
-    Paint redPaint;
-    DrawView drawLayer;
+    LandingPatternLayerView drawLayer;
     TextView textViewLog;
     ScrollView scrollLog;
-    AsyncImageAnalyse mAsyncImageAnalyse;
-    boolean imageIsProcessing = false;
+    LandingAreaDetector mLandingAreaDetector;
 
 
-    public byte[] a;
-    //    public Mat k;
-
-    public void setupViews(DrawView drawLayer, TextView textViewLog, ScrollView scrollLog){
+    public void setupViews(LandingPatternLayerView drawLayer, TextView textViewLog, ScrollView scrollLog){
         this.drawLayer = drawLayer;
         this.textViewLog = textViewLog;
         this.scrollLog = scrollLog;
@@ -93,7 +77,6 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
         initMediaCodec(VIDEO_MIME_TYPE);
 
         mReadyLock.unlock();
-        //surfaceCreated=true;
     }
 
     @Override
@@ -114,17 +97,17 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
 
     }
 
-    public MyBebopVideoView(Context context) {
+    public BebopVideoView(Context context) {
         super(context);
         customInit();
     }
 
-    public MyBebopVideoView(Context context, AttributeSet attrs) {
+    public BebopVideoView(Context context, AttributeSet attrs) {
         super(context, attrs);
         customInit();
     }
 
-    public MyBebopVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public BebopVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         customInit();
     }
@@ -133,10 +116,6 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
         setSurfaceTextureListener(this);
         mReadyLock = new ReentrantLock();
         bmp = Bitmap.createBitmap(640, 368, Bitmap.Config.ARGB_8888);
-        redPaint = new Paint();
-        redPaint.setColor(0xffff0000);
-        redPaint.setStrokeWidth(3);
-//        getHolder().addCallback(this);
     }
 
     public void displayFrame(ARFrame frame) {
@@ -191,10 +170,7 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
             }
         }
 
-        if (!imageIsProcessing) {
-            this.getBitmap(bmp);
-            analyseImage();
-        }
+        analyseImage();
 
         mReadyLock.unlock();
     }
@@ -219,6 +195,7 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
 
         mReadyLock.unlock();
     }
+
     /*
     12-26 16:15:26.013 29726-30224/com.i3rivale.droneapp D/BebopVideoView:
     outputimage={mime=video/raw, crop-top=0, crop-right=855, slice-height=480, color-format=2141391876,
@@ -266,81 +243,15 @@ public class MyBebopVideoView extends TextureView implements TextureView.Surface
         }
     }
 
-    private void analyseImage(){
-        if (!imageIsProcessing){
-            imageIsProcessing = true;
-            mAsyncImageAnalyse = new AsyncImageAnalyse();
-            mAsyncImageAnalyse.c = getContext();
-            mAsyncImageAnalyse.execute(bmp);
-        }
-
-    }
-
     /**
      * async image preprocessing
      */
-    private class AsyncImageAnalyse extends
-            AsyncTask<Bitmap, Void, Barcode> {
-
-        Context c;
-        BarcodeDetector detector;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            detector = new BarcodeDetector.Builder(c)
-                    .setBarcodeFormats(Barcode.DATA_MATRIX | Barcode.QR_CODE)
-                    .build();
+    private void analyseImage(){
+        if (mLandingAreaDetector == null || mLandingAreaDetector.getStatus() == AsyncTask.Status.FINISHED){
+            this.getBitmap(bmp);
+            mLandingAreaDetector = new QrCodeDetector(getContext(), drawLayer);
+            mLandingAreaDetector.execute(bmp);
         }
-
-        @Override
-        protected Barcode doInBackground(
-                Bitmap... params) {
-
-            Barcode barcode = null;
-            if (detector.isOperational()) {
-                //Log.d(TAG, "detector is Operational");
-                Frame frame = new Frame.Builder().setBitmap(params[0]).build();
-                SparseArray<Barcode> barcodes = detector.detect(frame);
-
-                //Log.d(TAG, "barcodes.size: " + barcodes.size());
-                if (barcodes.size() > 0){
-                    barcode = barcodes.valueAt(0);
-//                    new MyBarcode(barcodes.get(0).getBoundingBox(), barcodes.get(0).cornerPoints);
-                }
-//                for (int index = 0; index < barcodes.size(); index++) {
-//                    Barcode code = barcodes.valueAt(index);
-//                    p = code.cornerPoints;
-//                }
-            }else{
-                //Log.d(TAG, "detector is NOT Operational");
-            }
-            return barcode;
-        }
-
-        @Override
-        protected void onPostExecute(Barcode barcode) {
-            //Log.d(TAG, "barcode: " + ((barcode == null) ? " IS NULL " : " IS NOT NULL "));
-            if(barcode != null){
-                //BebopActivity.addTextLogIntent(getContext(), "QR code detected");
-
-                drawLayer.setBitmap(bmp);
-                drawLayer.setQrCodePoints(barcode.cornerPoints);
-                drawLayer.setPointsTs(System.currentTimeMillis());
-
-                ((BebopActivity)getContext()).mQrCodeFlyAbove.setCenterQr(new Point(barcode.getBoundingBox().centerX(), barcode.getBoundingBox().centerY()));
-                ((BebopActivity)getContext()).mQrCodeFlyAbove.setPointsCenterQr(barcode.cornerPoints);
-                ((BebopActivity)getContext()).mQrCodeFlyAbove.setLastTsQrCode(System.currentTimeMillis());
-            }
-            drawLayer.toggleDrawView();
-            drawLayer.invalidate();
-            imageIsProcessing = false;
-        }
-    }
-
-    static void saveImageToFile(Context c, Bitmap bmp){
-        String uuid = UUID.randomUUID().toString();
-        boolean res = ImageUtils.saveBitmapToSdCard(c, bmp, uuid);
     }
 
 }

@@ -27,8 +27,8 @@ import com.parrot.arsdk.arcontroller.ARFrame;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import com.parrot.sdksample.drone.BebopDrone;
 import com.parrot.sdksample.logic.QrCodeFlyAbove;
-import com.parrot.sdksample.view.DrawView;
-import com.parrot.sdksample.view.MyBebopVideoView;
+import com.parrot.sdksample.view.LandingPatternLayerView;
+import com.parrot.sdksample.view.BebopVideoView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -44,8 +44,8 @@ public class BebopActivity extends AppCompatActivity {
     private ProgressDialog mConnectionProgressDialog;
     private ProgressDialog mDownloadProgressDialog;
 
-    private MyBebopVideoView mVideoView;
-    private DrawView myDrawView;
+    private BebopVideoView mVideoView;
+    private LandingPatternLayerView myLandingPatternLayerView;
 
     private TextView mBatteryLabel, textViewLog, textViewLabelRoll, textViewLabelYaw;
     private Button mTakeOffLandBt, mDownloadBt, takePictureBt, gazUpBt, gazDownBt,
@@ -73,7 +73,6 @@ public class BebopActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bebop);
-
 
         initIHM();
         toggleViewControl(View.VISIBLE);
@@ -203,7 +202,7 @@ public class BebopActivity extends AppCompatActivity {
     }
 
     private void initIHM() {
-        myDrawView = (DrawView) findViewById(R.id.myDrawLayer);
+        myLandingPatternLayerView = (LandingPatternLayerView) findViewById(R.id.myDrawLayer);
 
         // setup text views
         textViewLabelRoll = (TextView) findViewById(R.id.textViewLabelRoll);
@@ -212,9 +211,9 @@ public class BebopActivity extends AppCompatActivity {
         textViewLog.setText("");
         scrollLog = (ScrollView) findViewById(R.id.scrollLog);
 
-        mVideoView = (MyBebopVideoView) findViewById(R.id.videoView);
+        mVideoView = (BebopVideoView) findViewById(R.id.videoView);
         mVideoView.setSurfaceTextureListener(mVideoView);
-        mVideoView.setupViews(myDrawView, textViewLog, scrollLog);
+        mVideoView.setupViews(myLandingPatternLayerView, textViewLog, scrollLog);
 
         findViewById(R.id.emergencyBt).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -662,7 +661,7 @@ public class BebopActivity extends AppCompatActivity {
     /**
      * 1) camera down
      * 2) take off
-     * 3) algorithm will try to land
+     * 3) land algorithm
      */
     private void launchPhase1(){
         mBebopDrone.setCameraOrientationV2((byte) -100, (byte) 0);
@@ -675,16 +674,28 @@ public class BebopActivity extends AppCompatActivity {
     }
 
     /**
-     * TODO
+     * TODO progress
+     * 1) camera down
+     * 2) take off
+     * 3) move 5m up
+     * 4) wait 5sec
+     * 4) move 5m down
+     * 5) land algorithm
      */
     private void launchPhase2(){
-        Toast.makeText(getApplicationContext(), "phase 2", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "phase 2 TODO", Toast.LENGTH_LONG).show();
     }
 
     /**
      * TODO
+     * 1) camera down
+     * 2) take off
+     * 3) move 5m up (save interesting points)
+     * 4) wait 5sec
+     * 4) move 5m down (use interesting point to recover)
+     * 5) land algorithm
      */
     private void launchPhase3(){
-        Toast.makeText(getApplicationContext(), "phase 3", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "phase 3 TODO", Toast.LENGTH_LONG).show();
     }
 }

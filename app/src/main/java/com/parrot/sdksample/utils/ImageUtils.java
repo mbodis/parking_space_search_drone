@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 
 /**
  * Created by mbodis on 4/21/17.
@@ -38,5 +39,10 @@ public class ImageUtils {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static void saveImageToFile(Context c, Bitmap bmp){
+        String uuid = UUID.randomUUID().toString();
+        boolean res = ImageUtils.saveBitmapToSdCard(c, bmp, uuid);
     }
 }
