@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -39,6 +40,8 @@ import static com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYI
 
 public class BebopActivity extends AppCompatActivity {
     private static final String TAG = "BebopActivity";
+    private static final String ACTION_LOG_MESSAGE = TAG + "_log_message";
+    private static final String ACTION_LANDING_STATUS = TAG + "_landing_status";
     private BebopDrone mBebopDrone;
 
     private ProgressDialog mConnectionProgressDialog;
@@ -47,7 +50,8 @@ public class BebopActivity extends AppCompatActivity {
     private BebopVideoView mVideoView;
     private LandingPatternLayerView myLandingPatternLayerView;
 
-    private TextView mBatteryLabel, textViewLog, textViewLabelRoll, textViewLabelYaw;
+    private TextView mBatteryLabel, textViewLog, textViewLabelRoll, textViewLabelYaw,
+    landWidthTv, landHeightTv, landRotationTv, landVerticalTv;
     private Button mTakeOffLandBt, mDownloadBt, takePictureBt, gazUpBt, gazDownBt,
             yawLeftBt, yawRightBt, forwardBt, backBt, rollLeftBt, rollRightBt, cameraDown,
             cameraCenter, parkPhase1Btn, parkPhase2Btn, parkPhase3Btn;
@@ -62,8 +66,16 @@ public class BebopActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent != null){
-                if (intent.hasExtra("msg")){
+                if (intent.getAction().equals(ACTION_LOG_MESSAGE)){
                     addTextLog(intent.getStringExtra("msg"));
+                }
+
+                if (intent.getAction().equals(ACTION_LANDING_STATUS)){
+                    boolean landWidth = intent.getBooleanExtra("landWidth", false);
+                    boolean landHeight = intent.getBooleanExtra("landHeight", false);
+                    boolean landRotation = intent.getBooleanExtra("landRotation", false);
+                    boolean landVertical = intent.getBooleanExtra("landVertical", false);
+                    setLandingStatus(landWidth, landHeight, landRotation, landVertical);
                 }
             }
         }
@@ -90,7 +102,8 @@ public class BebopActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(mBroadcastReceiver, new IntentFilter(TAG));
+        registerReceiver(mBroadcastReceiver, new IntentFilter(ACTION_LOG_MESSAGE));
+        registerReceiver(mBroadcastReceiver, new IntentFilter(ACTION_LANDING_STATUS));
     }
 
     @Override
@@ -199,10 +212,19 @@ public class BebopActivity extends AppCompatActivity {
 
     private void toggleViewLog(int visibility){
         textViewLog.setVisibility(visibility);
+        landWidthTv.setVisibility(visibility);
+        landHeightTv.setVisibility(visibility);
+        landRotationTv.setVisibility(visibility);
+        landVerticalTv.setVisibility(visibility);
     }
 
     private void initIHM() {
         myLandingPatternLayerView = (LandingPatternLayerView) findViewById(R.id.myDrawLayer);
+
+        landWidthTv = (TextView) findViewById(R.id.landWidthTv);
+        landHeightTv = (TextView) findViewById(R.id.landHeightTv);
+        landRotationTv = (TextView) findViewById(R.id.landRotationTv);
+        landVerticalTv = (TextView) findViewById(R.id.landVerticalTv);
 
         // setup text views
         textViewLabelRoll = (TextView) findViewById(R.id.textViewLabelRoll);
@@ -645,9 +667,18 @@ public class BebopActivity extends AppCompatActivity {
         }
     };
 
-    public static final void addTextLogIntent(Context ctx, String msg){
-        Intent mIntent = new Intent(TAG);
+    public static void addTextLogIntent(Context ctx, String msg){
+        Intent mIntent = new Intent(ACTION_LOG_MESSAGE);
         mIntent.putExtra("msg", msg);
+        ctx.sendBroadcast(mIntent);
+    }
+
+    public static void sendLandControllerStatus(Context ctx, boolean landWidth, boolean landHeight, boolean landRotation, boolean landVertical){
+        Intent mIntent = new Intent(ACTION_LANDING_STATUS);
+        mIntent.putExtra("landWidth", landWidth);
+        mIntent.putExtra("landHeight", landHeight);
+        mIntent.putExtra("landRotation", landRotation);
+        mIntent.putExtra("landVertical", landVertical);
         ctx.sendBroadcast(mIntent);
     }
 
@@ -656,6 +687,15 @@ public class BebopActivity extends AppCompatActivity {
         textViewLog.append(date + " " + msg + "\n");
         scrollLog.scrollTo(0, 999999);
         Log.d(TAG, msg);
+    }
+
+    private void setLandingStatus(boolean landWidth, boolean landHeight, boolean landRotation, boolean landVertical){
+        int red = Color.parseColor("#ff0000");
+        int green = Color.parseColor("#00ff00");
+        landWidthTv.setTextColor(landWidth ? green : red);
+        landHeightTv.setTextColor(landHeight ? green : red);
+        landRotationTv.setTextColor(landRotation ? green : red);
+        landVerticalTv.setTextColor(landVertical ? green : red);
     }
 
     /**
@@ -683,6 +723,7 @@ public class BebopActivity extends AppCompatActivity {
      * 5) land algorithm
      */
     private void launchPhase2(){
+        // TODO create stack feature
         Toast.makeText(getApplicationContext(), "phase 2 TODO", Toast.LENGTH_LONG).show();
     }
 
@@ -696,6 +737,7 @@ public class BebopActivity extends AppCompatActivity {
      * 5) land algorithm
      */
     private void launchPhase3(){
+        // TODO create stack feature
         Toast.makeText(getApplicationContext(), "phase 3 TODO", Toast.LENGTH_LONG).show();
     }
 }

@@ -193,36 +193,37 @@
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:orientation="vertical"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
         <Button
             android:id="@+id/parkPhase1Btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="8dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:text="phase1: land on qr code" />
+            android:text="phase1: land on qr code"
+            android:textSize="8dp" />
 
         <Button
             android:id="@+id/parkPhase2Btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="8dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:text="phase2: go up/down, land on qr code" />
+            android:text="phase2: go up/down, land on qr code"
+            android:textSize="8dp" />
 
         <Button
             android:id="@+id/parkPhase3Btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="8dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:text="phase3: go up/down, search qr code, land on qr code" />
+            android:text="phase3: go up/down, search qr code, land on qr code"
+            android:textSize="8dp" />
     </LinearLayout>
-    
+
     <ScrollView
         android:id="@+id/scrollLog"
         android:layout_width="450dp"
@@ -239,5 +240,49 @@
             android:textColor="@android:color/white"
             android:visibility="gone" />
     </ScrollView>
+
+    <TextView
+        android:id="@+id/landWidthTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:text="landing LEFT-RIGHT"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/landHeightTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/landWidthTv"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:text="landing FORWARD-BACKWARD"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/landRotationTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/landHeightTv"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:text="landing ROTATION"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/landVerticalTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/landRotationTv"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:text="landing UP-DOWN"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
 
 </RelativeLayout>
