@@ -16,16 +16,16 @@ import java.util.List;
  * Created by mbodis on 6/3/17.
  */
 
-public class DronTimeMoves {
+public class DroneTimeMoves {
 
-    public static final String TAG = DronTimeMoves.class.getName();
+    public static final String TAG = DroneTimeMoves.class.getName();
 
     boolean isLogicThreadAlive = true;
     Thread logicThread;
     private List<DroneMoveIface> moves = new ArrayList<DroneMoveIface>();
 
-    public DronTimeMoves(final Context ctx, final BebopDrone mBebopDrone, final LandOnQrCode mLandOnQrCode,
-                         List<DroneMoveIface> newMoves) {
+    public DroneTimeMoves(final Context ctx, final BebopDrone mBebopDrone, final LandOnQrCode mLandOnQrCode,
+                          List<DroneMoveIface> newMoves) {
         this.moves = newMoves;
 
         logicThread = new Thread(new Runnable() {
@@ -59,8 +59,19 @@ public class DronTimeMoves {
         logicThread.start();
     }
 
-    public void stop(){
+    public void stop(BebopDrone mBebopDrone, LandOnQrCode mLandOnQrCode){
         isLogicThreadAlive = false;
+        for (DroneMoveIface move : moves) {
+            if (move instanceof TimeMoveIface) {
+                TimeMoveIface mTimeMove = (TimeMoveIface) move;
+                mTimeMove.executeOnMoveEnds(mBebopDrone);
+            }
+
+            if (move instanceof ConditionMoveIface) {
+                ConditionMoveIface mConditionMove = (ConditionMoveIface) move;
+                mConditionMove.executeOnMoveEnds(mBebopDrone, mLandOnQrCode);
+            }
+        }
         moves = new ArrayList<DroneMoveIface>();
     }
 

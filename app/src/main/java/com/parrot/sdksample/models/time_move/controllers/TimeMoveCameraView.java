@@ -16,8 +16,9 @@ public class TimeMoveCameraView extends TimeMoveIface {
 
     int viewMode = VIEW_FORWARD;
 
-    public TimeMoveCameraView(int viewType) {
+    public TimeMoveCameraView(int viewMode) {
         super(250);
+        this.viewMode = viewMode;
     }
 
     @Override

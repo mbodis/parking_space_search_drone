@@ -28,19 +28,22 @@ import com.parrot.arsdk.arcontroller.ARFrame;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import com.parrot.sdksample.drone.BebopDrone;
 import com.parrot.sdksample.models.qr_code_landing.LandOnQrCode;
+import com.parrot.sdksample.models.time_move.DroneTimeMoves;
+import com.parrot.sdksample.models.time_move.controllers.ConditionMoveLandQrCode;
+import com.parrot.sdksample.models.time_move.controllers.TimeMoveBackward;
 import com.parrot.sdksample.models.time_move.controllers.TimeMoveCameraView;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveLand;
 import com.parrot.sdksample.models.time_move.controllers.TimeMoveDown;
+import com.parrot.sdksample.models.time_move.controllers.TimeMoveForward;
+import com.parrot.sdksample.models.time_move.controllers.TimeMoveLand;
 import com.parrot.sdksample.models.time_move.controllers.TimeMoveLeft;
 import com.parrot.sdksample.models.time_move.controllers.TimeMoveRight;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveUp;
 import com.parrot.sdksample.models.time_move.controllers.TimeMoveRotateLeft;
 import com.parrot.sdksample.models.time_move.controllers.TimeMoveRotateRight;
+import com.parrot.sdksample.models.time_move.controllers.TimeMoveSleep;
 import com.parrot.sdksample.models.time_move.controllers.TimeMoveTakeOff;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveBackward;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveForward;
+import com.parrot.sdksample.models.time_move.controllers.TimeMoveUp;
 import com.parrot.sdksample.models.time_move.iface.DroneMoveIface;
-import com.parrot.sdksample.models.time_move.DronTimeMoves;
+import com.parrot.sdksample.models.time_move.iface.TimeMoveIface;
 import com.parrot.sdksample.view.LandingPatternLayerView;
 import com.parrot.sdksample.view.BebopVideoView;
 
@@ -75,7 +78,7 @@ public class BebopActivity extends AppCompatActivity {
     private int mNbMaxDownload;
     private int mCurrentDownloadIndex;
 
-    public DronTimeMoves mDronTimeMoves;
+    public DroneTimeMoves mDroneTimeMoves;
     public LandOnQrCode mLandOnQrCode;
 
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver(){
@@ -729,25 +732,11 @@ public class BebopActivity extends AppCompatActivity {
      * 3) land algorithm
      */
     private void launchPhase1(){
-
-        // camera down
-        mBebopDrone.setCameraOrientationV2((byte) -100, (byte) 0);
-
-        // take off
-        if (mBebopDrone.getFlyingState() == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED) {
-            mBebopDrone.takeOff();
-        }else{
-            Toast.makeText(getApplicationContext(), "invalid flight state, cannot takeOff", Toast.LENGTH_LONG).show();
-        }
-
-        // launch landing procedure
-        mLandOnQrCode.setLandingToQrCodeEnabled(true);
-
-//        List<DroneMoveIface> moves = new ArrayList<DroneMoveIface>();
-//        moves.add(new TimeMoveCameraView(TimeMoveCameraView.VIEW_DOWN));
-//        moves.add(new TimeMoveTakeOff());
-//        moves.add(new ConditionMoveLandQrCode(2*60*1000));
-//        mDronTimeMoves = new DronTimeMoves(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        List<DroneMoveIface> moves = new ArrayList<DroneMoveIface>();
+        moves.add(new TimeMoveCameraView(TimeMoveCameraView.VIEW_DOWN));
+        moves.add(new TimeMoveTakeOff());
+        moves.add(new ConditionMoveLandQrCode(2*60*1000));
+        mDroneTimeMoves = new DroneTimeMoves(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
     }
 
     /**
@@ -760,16 +749,14 @@ public class BebopActivity extends AppCompatActivity {
      * 5) land algorithm
      */
     private void launchPhase2(){
-
-        testTimeMoves();
-//        List<DroneMoveIface> moves = new ArrayList<DroneMoveIface>();
-//        moves.add(new TimeMoveCameraView(TimeMoveCameraView.VIEW_FORWARD));
-//        moves.add(new TimeMoveTakeOff());
-//        moves.add(new TimeMoveUp(TimeMoveIface.SPEED_FAST, 1000));
-//        moves.add(new TimeMoveSleep(5000));
-//        moves.add(new TimeMoveDown(TimeMoveIface.SPEED_FAST, 5000));
-//        moves.add(new ConditionMoveLandQrCode(2*60*1000));
-//        mDronTimeMoves = new DronTimeMoves(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        List<DroneMoveIface> moves = new ArrayList<DroneMoveIface>();
+        moves.add(new TimeMoveCameraView(TimeMoveCameraView.VIEW_FORWARD));
+        moves.add(new TimeMoveTakeOff());
+        moves.add(new TimeMoveUp(TimeMoveIface.SPEED_FAST, 1000));
+        moves.add(new TimeMoveSleep(5000));
+        moves.add(new TimeMoveDown(TimeMoveIface.SPEED_FAST, 5000));
+        moves.add(new ConditionMoveLandQrCode(2*60*1000));
+        mDroneTimeMoves = new DroneTimeMoves(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
     }
 
     /**
@@ -790,7 +777,7 @@ public class BebopActivity extends AppCompatActivity {
      * stop all drone time moves
      */
     private void stopPhase(){
-        mDronTimeMoves.stop();
+        mDroneTimeMoves.stop(mBebopDrone, mLandOnQrCode);
     }
 
     private void testTimeMoves(){
@@ -802,11 +789,12 @@ public class BebopActivity extends AppCompatActivity {
         moves.add(new TimeMoveCameraView(TimeMoveCameraView.VIEW_FORWARD));
         moves.add(new TimeMoveUp(1000));
         moves.add(new TimeMoveDown(1000));
-        moves.add(new TimeMoveForward(1000));
-        moves.add(new TimeMoveBackward(1000));
-        moves.add(new TimeMoveLeft(1000));
-        moves.add(new TimeMoveRight(1000));
+        moves.add(new TimeMoveForward(2000));
+        moves.add(new TimeMoveBackward(2000));
+        moves.add(new TimeMoveLeft(1500));
+        moves.add(new TimeMoveSleep(2000));
+        moves.add(new TimeMoveRight(1500));
         moves.add(new TimeMoveLand());
-        mDronTimeMoves = new DronTimeMoves(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        mDroneTimeMoves = new DroneTimeMoves(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
     }
 }

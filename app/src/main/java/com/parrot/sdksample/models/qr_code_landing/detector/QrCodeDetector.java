@@ -9,6 +9,7 @@ import android.util.SparseArray;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.parrot.sdksample.activity.BebopActivity;
 import com.parrot.sdksample.models.common.MyPoint;
 import com.parrot.sdksample.models.landing.iface.LandingAreaDetector;
 import com.parrot.sdksample.models.qr_code_landing.logic.LandingPatternQrCode;
@@ -82,8 +83,11 @@ public class QrCodeDetector extends LandingAreaDetector {
             long ts = System.currentTimeMillis();
             LandingPatternQrCode mLandingPatternQrCode = new LandingPatternQrCode(ts, center, cornerPoints);
 
-            // send pattern
-            LandOnQrCode.updateQrCodeDetectionStatus(c, mLandingPatternQrCode);
+            // send pattern via intent - works incorrectly (delay ?)
+            // LandOnQrCode.updateQrCodeDetectionStatus(c, mLandingPatternQrCode);
+
+            // send pattern directly - works good
+            ((BebopActivity)c).mLandOnQrCode.setLandingPattern(mLandingPatternQrCode);
         }
         drawLayer.toggleDrawView();
         drawLayer.invalidate();

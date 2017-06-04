@@ -98,6 +98,14 @@ public class LandOnQrCode {
                             }
                         }
 
+                    // finish active moves
+                    }else{
+                        mLandingPatternLostController.endOfMove();
+                        mSearchController.endOfMove();
+                        mUpDownController.endOfMove();
+                        mRotationController.endOfMove();
+                        mLeftRightController.endOfMove();
+                        mForwardBackwardController.endOfMove();
                     }
 
                     SystemClock.sleep(50);
