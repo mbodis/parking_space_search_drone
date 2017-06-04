@@ -22,7 +22,7 @@ import com.parrot.arsdk.ARSDK;
 import com.parrot.arsdk.ardiscovery.ARDISCOVERY_PRODUCT_ENUM;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryService;
-import com.parrot.sdksample.discovery.DroneDiscoverer;
+import com.parrot.sdksample.drone.discovery.DroneDiscoverer;
 
 import java.util.ArrayList;
 import java.util.HashSet;

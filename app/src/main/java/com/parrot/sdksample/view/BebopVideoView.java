@@ -16,8 +16,8 @@ import android.widget.TextView;
     import com.parrot.arsdk.arcontroller.ARCONTROLLER_STREAM_CODEC_TYPE_ENUM;
 import com.parrot.arsdk.arcontroller.ARControllerCodec;
 import com.parrot.arsdk.arcontroller.ARFrame;
-    import com.parrot.sdksample.models.iface.LandingAreaDetector;
-    import com.parrot.sdksample.models.qr_code.detector.QrCodeDetector;
+    import com.parrot.sdksample.models.landing.iface.LandingAreaDetector;
+    import com.parrot.sdksample.models.qr_code_landing.detector.QrCodeDetector;
 
     import java.io.IOException;
 import java.nio.ByteBuffer;

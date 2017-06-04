@@ -222,6 +222,16 @@
             android:layout_alignParentLeft="true"
             android:text="phase3: go up/down, search qr code, land on qr code"
             android:textSize="8dp" />
+
+        <Button
+            android:id="@+id/parkStopBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:text="STOP"
+            android:textSize="8dp" />
     </LinearLayout>
 
     <ScrollView
