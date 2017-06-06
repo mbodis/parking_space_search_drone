@@ -20,6 +20,7 @@ public class DroneTimeMoves {
 
     public static final String TAG = DroneTimeMoves.class.getName();
 
+    boolean started = false;
     boolean isLogicThreadAlive = true;
     Thread logicThread;
     private List<DroneMoveIface> moves = new ArrayList<DroneMoveIface>();
@@ -27,7 +28,6 @@ public class DroneTimeMoves {
     public DroneTimeMoves(final Context ctx, final BebopDrone mBebopDrone, final LandOnQrCode mLandOnQrCode,
                           List<DroneMoveIface> newMoves) {
         this.moves = newMoves;
-
         logicThread = new Thread(new Runnable() {
 
             @Override
@@ -56,7 +56,15 @@ public class DroneTimeMoves {
                 }
             }
         });
+    }
+
+    public void start(){
         logicThread.start();
+        started = true;
+    }
+
+    public boolean isInProgress(){
+        return isLogicThreadAlive && started;
     }
 
     public void stop(BebopDrone mBebopDrone, LandOnQrCode mLandOnQrCode){

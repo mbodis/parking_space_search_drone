@@ -7,7 +7,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -20,6 +22,8 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM;
 import com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM;
 import com.parrot.arsdk.arcontroller.ARCONTROLLER_DEVICE_STATE_ENUM;
@@ -30,6 +34,7 @@ import com.parrot.sdksample.drone.BebopDrone;
 import com.parrot.sdksample.models.qr_code_landing.LandOnQrCode;
 import com.parrot.sdksample.models.time_move.DroneTimeMoves;
 import com.parrot.sdksample.models.time_move.controllers.ConditionMoveLandQrCode;
+import com.parrot.sdksample.models.time_move.controllers.ConditionMoveTakePicture;
 import com.parrot.sdksample.models.time_move.controllers.TimeMoveBackward;
 import com.parrot.sdksample.models.time_move.controllers.TimeMoveCameraView;
 import com.parrot.sdksample.models.time_move.controllers.TimeMoveDown;
@@ -44,17 +49,16 @@ import com.parrot.sdksample.models.time_move.controllers.TimeMoveTakeOff;
 import com.parrot.sdksample.models.time_move.controllers.TimeMoveUp;
 import com.parrot.sdksample.models.time_move.iface.DroneMoveIface;
 import com.parrot.sdksample.models.time_move.iface.TimeMoveIface;
-import com.parrot.sdksample.view.LandingPatternLayerView;
 import com.parrot.sdksample.view.BebopVideoView;
+import com.parrot.sdksample.view.LandingPatternLayerView;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import sk.svb.drone.parking_space.R;
-
-import static com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_ENUM.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED;
 
 public class BebopActivity extends AppCompatActivity {
     private static final String TAG = "BebopActivity";
@@ -72,14 +76,19 @@ public class BebopActivity extends AppCompatActivity {
     landWidthTv, landHeightTv, landRotationTv, landVerticalTv;
     private Button mTakeOffLandBt, mDownloadBt, takePictureBt, gazUpBt, gazDownBt,
             yawLeftBt, yawRightBt, forwardBt, backBt, rollLeftBt, rollRightBt, cameraDown,
-            cameraCenter, parkPhase1Btn, parkPhase2Btn, parkPhase3Btn, parkStopBtn;
+            cameraCenter, parkPhase1Btn, parkPhase2Btn, parkPhase3Btn, parkStopBtn, showImgBtn;
     private ScrollView scrollLog;
+    private SimpleDraweeView img;
+
 
     private int mNbMaxDownload;
     private int mCurrentDownloadIndex;
 
     public DroneTimeMoves mDroneTimeMoves;
     public LandOnQrCode mLandOnQrCode;
+
+    public String lastImgPath;
+    public boolean imageShown = false;
 
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver(){
         @Override
@@ -103,6 +112,8 @@ public class BebopActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fresco.initialize(getApplicationContext());
+
         setContentView(R.layout.activity_bebop);
 
         initIHM();
@@ -146,6 +157,13 @@ public class BebopActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        // hide foto
+        if (imageShown){
+            imageShown = false;
+            img.setVisibility(View.INVISIBLE);
+            return;
+        }
+
         if (mBebopDrone != null) {
             mConnectionProgressDialog = new ProgressDialog(this, R.style.AppCompatAlertDialogStyle);
             mConnectionProgressDialog.setIndeterminate(true);
@@ -222,12 +240,14 @@ public class BebopActivity extends AppCompatActivity {
 
         textViewLabelRoll.setVisibility(visibility);
         textViewLabelYaw.setVisibility(visibility);
+
     }
     private void toggleViewControl2(int visibility){
         parkPhase1Btn.setVisibility(visibility);
         parkPhase2Btn.setVisibility(visibility);
         parkPhase3Btn.setVisibility(visibility);
         parkStopBtn.setVisibility(visibility);
+        showImgBtn.setVisibility(visibility);
     }
 
     private void toggleViewLog(int visibility){
@@ -252,6 +272,9 @@ public class BebopActivity extends AppCompatActivity {
         textViewLog = (TextView) findViewById(R.id.textViewLog);
         textViewLog.setText("");
         scrollLog = (ScrollView) findViewById(R.id.scrollLog);
+
+        img = (SimpleDraweeView) findViewById(R.id.sdvImage);
+        img.setVisibility(View.GONE);
 
         mVideoView = (BebopVideoView) findViewById(R.id.videoView);
         mVideoView.setSurfaceTextureListener(mVideoView);
@@ -582,6 +605,13 @@ public class BebopActivity extends AppCompatActivity {
                 stopPhase();
             }
         });
+        showImgBtn = ((Button) findViewById(R.id.showImgBtn));
+        showImgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showLastImage();
+            }
+        });
 
     }
 
@@ -631,28 +661,37 @@ public class BebopActivity extends AppCompatActivity {
 
         @Override
         public void onPictureTaken(ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
-            //Log.i(TAG, "Picture has been taken");
+            // Log.d(TAG, "Picture has been taken err:" + error.getValue());
+
+            // if DroneTimeMoves download image automatically
+            if (error == ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_OK){
+                if (mDroneTimeMoves.isInProgress()){
+                    mBebopDrone.getLastFlightMedias();
+                }
+            }
         }
 
         @Override
         public void configureDecoder(ARControllerCodec codec) {
-            //Log.i(TAG, "configureDecoder");
+            // Log.d(TAG, "configureDecoder");
             mVideoView.configureDecoder(codec);
         }
 
         @Override
         public void onFrameReceived(ARFrame frame) {
-            //Log.i(TAG, "onFrameReceived");
+            // Log.d(TAG, "onFrameReceived");
             mVideoView.displayFrame(frame);
         }
 
         @Override
         public void onMatchingMediasFound(int nbMedias) {
+            //Log.d(TAG, "onMatchingMediasFound");
             mDownloadProgressDialog.dismiss();
 
             mNbMaxDownload = nbMedias;
             mCurrentDownloadIndex = 1;
 
+            Log.d(TAG, "nbMedias: " + nbMedias);
             if (nbMedias > 0) {
                 mDownloadProgressDialog = new ProgressDialog(BebopActivity.this, R.style.AppCompatAlertDialogStyle);
                 mDownloadProgressDialog.setIndeterminate(false);
@@ -674,11 +713,21 @@ public class BebopActivity extends AppCompatActivity {
 
         @Override
         public void onDownloadProgressed(String mediaName, int progress) {
+            //Log.d(TAG, "onDownloadProgressed " + progress);
             mDownloadProgressDialog.setProgress(((mCurrentDownloadIndex - 1) * 100) + progress);
         }
 
         @Override
         public void onDownloadComplete(String mediaName) {
+            //Log.d(TAG, "onDownloadComplete " + mediaName);
+
+            String externalDirectory = Environment.getExternalStorageDirectory().toString().concat("/ARSDKMedias/");
+            File newPhoto = new File(externalDirectory + mediaName);
+            if (newPhoto.exists()) {
+                lastImgPath = newPhoto.getAbsolutePath();
+                Toast.makeText(getApplicationContext(), "photo downloaded", Toast.LENGTH_SHORT).show();
+            }
+
             mCurrentDownloadIndex++;
             mDownloadProgressDialog.setSecondaryProgress(mCurrentDownloadIndex * 100);
 
@@ -694,6 +743,17 @@ public class BebopActivity extends AppCompatActivity {
 
         }
     };
+
+    private void showLastImage(){
+        if (lastImgPath != null) {
+            Uri imageUri = Uri.fromFile(new File(lastImgPath));
+            img.setImageURI(imageUri);
+            img.setVisibility(View.VISIBLE);
+            imageShown = true;
+        }else{
+            Toast.makeText(getApplicationContext(), "foto not available", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     public static void addTextLogIntent(Context ctx, String msg){
         Intent mIntent = new Intent(ACTION_LOG_MESSAGE);
@@ -737,6 +797,7 @@ public class BebopActivity extends AppCompatActivity {
         moves.add(new TimeMoveTakeOff());
         moves.add(new ConditionMoveLandQrCode(2*60*1000));
         mDroneTimeMoves = new DroneTimeMoves(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        mDroneTimeMoves.start();
     }
 
     /**
@@ -744,6 +805,7 @@ public class BebopActivity extends AppCompatActivity {
      * 1) camera down
      * 2) take off
      * 3) move 5m up
+     * 4) take picture
      * 4) wait 5sec
      * 4) move 5m down
      * 5) land algorithm
@@ -753,10 +815,13 @@ public class BebopActivity extends AppCompatActivity {
         moves.add(new TimeMoveCameraView(TimeMoveCameraView.VIEW_FORWARD));
         moves.add(new TimeMoveTakeOff());
         moves.add(new TimeMoveUp(TimeMoveIface.SPEED_FAST, 1000));
-        moves.add(new TimeMoveSleep(5000));
+        moves.add(new TimeMoveSleep(2500));
+        moves.add(new ConditionMoveTakePicture());
+        moves.add(new TimeMoveSleep(2500));
         moves.add(new TimeMoveDown(TimeMoveIface.SPEED_FAST, 5000));
         moves.add(new ConditionMoveLandQrCode(2*60*1000));
         mDroneTimeMoves = new DroneTimeMoves(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        mDroneTimeMoves.start();
     }
 
     /**
@@ -777,7 +842,9 @@ public class BebopActivity extends AppCompatActivity {
      * stop all drone time moves
      */
     private void stopPhase(){
-        mDroneTimeMoves.stop(mBebopDrone, mLandOnQrCode);
+        if (mDroneTimeMoves != null) {
+            mDroneTimeMoves.stop(mBebopDrone, mLandOnQrCode);
+        }
     }
 
     private void testTimeMoves(){
@@ -796,5 +863,6 @@ public class BebopActivity extends AppCompatActivity {
         moves.add(new TimeMoveRight(1500));
         moves.add(new TimeMoveLand());
         mDroneTimeMoves = new DroneTimeMoves(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        mDroneTimeMoves.start();
     }
 }

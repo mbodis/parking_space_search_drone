@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/piloting_view"
     android:layout_width="match_parent"
@@ -227,10 +228,20 @@
             android:id="@+id/parkStopBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
+            android:layout_marginTop="40dp"
             android:text="STOP"
+            android:textSize="8dp" />
+
+        <Button
+            android:id="@+id/showImgBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="40dp"
+            android:text="--foto--"
             android:textSize="8dp" />
     </LinearLayout>
 
@@ -295,4 +306,12 @@
         android:textStyle="bold" />
 
 
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/sdvImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        fresco:actualImageScaleType="focusCrop"
+        fresco:failureImage="@drawable/ic_menu_camera"
+        fresco:failureImageScaleType="centerCrop"
+        fresco:placeholderImage="@drawable/ic_menu_send" />
 </RelativeLayout>
