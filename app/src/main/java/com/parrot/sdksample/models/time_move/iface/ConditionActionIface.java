@@ -7,11 +7,11 @@ import com.parrot.sdksample.models.qr_code_landing.LandOnQrCode;
  * Created by mbodis on 6/4/17.
  */
 
-public abstract class ConditionMoveIface extends DroneMoveIface{
+public abstract class ConditionActionIface extends DroneActionIface {
 
     protected long durationMilis = 0;
 
-    public ConditionMoveIface(long durationMilis){
+    public ConditionActionIface(long durationMilis){
         this.durationMilis = durationMilis;
     }
 

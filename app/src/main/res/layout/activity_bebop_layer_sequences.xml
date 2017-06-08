@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layer_sequences"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/parkPhase1Btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="phase1: land on qr code"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/parkPhase2Btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="phase2: go up/down, land on qr code"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/parkPhase3Btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="phase3: follow QR codes"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/parkPhase4Btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="phase4: go up/down, search qr code, land on qr code"
+            android:textSize="12dp" />
+
+        <Button
+            android:id="@+id/showImgBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="-- foto --"
+            android:textSize="12dp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/parkStopBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:text="STOP"
+        android:textSize="12dp" />
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/sequenceTakenFrame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        fresco:actualImageScaleType="focusCrop"
+        fresco:failureImageScaleType="centerCrop" />
+
+</RelativeLayout>

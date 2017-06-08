@@ -1,21 +1,21 @@
 package com.parrot.sdksample.models.time_move.controllers;
 
 import com.parrot.sdksample.drone.BebopDrone;
-import com.parrot.sdksample.models.time_move.iface.TimeMoveIface;
+import com.parrot.sdksample.models.time_move.iface.MoveActionIface;
 
 /**
  * Created by mbodis on 6/4/17.
  */
 
-public class TimeMoveDown extends TimeMoveIface {
+public class DroneMoveDown extends MoveActionIface {
 
-    public static final String TAG = TimeMoveDown.class.getName();
+    public static final String TAG = DroneMoveDown.class.getName();
 
-    public TimeMoveDown(int speed, int durationMilis) {
+    public DroneMoveDown(int speed, int durationMilis) {
         super(DIRECTION_DOWN, speed, durationMilis);
     }
 
-    public TimeMoveDown(int durationMilis) {
+    public DroneMoveDown(int durationMilis) {
         super(DIRECTION_DOWN, SPEED_NORMAL, durationMilis);
     }
 

@@ -32,23 +32,23 @@ import com.parrot.arsdk.arcontroller.ARFrame;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import com.parrot.sdksample.drone.BebopDrone;
 import com.parrot.sdksample.models.qr_code_landing.LandOnQrCode;
-import com.parrot.sdksample.models.time_move.DroneTimeMoves;
-import com.parrot.sdksample.models.time_move.controllers.ConditionMoveLandQrCode;
-import com.parrot.sdksample.models.time_move.controllers.ConditionMoveTakePicture;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveBackward;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveCameraView;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveDown;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveForward;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveLand;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveLeft;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveRight;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveRotateLeft;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveRotateRight;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveSleep;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveTakeOff;
-import com.parrot.sdksample.models.time_move.controllers.TimeMoveUp;
-import com.parrot.sdksample.models.time_move.iface.DroneMoveIface;
-import com.parrot.sdksample.models.time_move.iface.TimeMoveIface;
+import com.parrot.sdksample.models.time_move.DroneActionsQueue;
+import com.parrot.sdksample.models.time_move.controllers.ConditionActionLandQrCode;
+import com.parrot.sdksample.models.time_move.controllers.ConditionActionTakePicture;
+import com.parrot.sdksample.models.time_move.controllers.DroneMoveBackward;
+import com.parrot.sdksample.models.time_move.controllers.SimpleActionCameraView;
+import com.parrot.sdksample.models.time_move.controllers.DroneMoveDown;
+import com.parrot.sdksample.models.time_move.controllers.DroneMoveForward;
+import com.parrot.sdksample.models.time_move.controllers.SimpleActionLand;
+import com.parrot.sdksample.models.time_move.controllers.DroneMoveLeft;
+import com.parrot.sdksample.models.time_move.controllers.DroneMoveRight;
+import com.parrot.sdksample.models.time_move.controllers.DroneMoveRotateLeft;
+import com.parrot.sdksample.models.time_move.controllers.DroneMoveRotateRight;
+import com.parrot.sdksample.models.time_move.controllers.SimpleActionMoveSleep;
+import com.parrot.sdksample.models.time_move.controllers.SimpleActionTakeOff;
+import com.parrot.sdksample.models.time_move.controllers.DroneMoveUp;
+import com.parrot.sdksample.models.time_move.iface.DroneActionIface;
+import com.parrot.sdksample.models.time_move.iface.MoveActionIface;
 import com.parrot.sdksample.view.BebopVideoView;
 import com.parrot.sdksample.view.LandingPatternLayerView;
 
@@ -76,15 +76,16 @@ public class BebopActivity extends AppCompatActivity {
     landWidthTv, landHeightTv, landRotationTv, landVerticalTv;
     private Button mTakeOffLandBt, mDownloadBt, takePictureBt, gazUpBt, gazDownBt,
             yawLeftBt, yawRightBt, forwardBt, backBt, rollLeftBt, rollRightBt, cameraDown,
-            cameraCenter, parkPhase1Btn, parkPhase2Btn, parkPhase3Btn, parkStopBtn, showImgBtn;
+            cameraCenter, parkPhase1Btn, parkPhase2Btn, parkPhase3Btn, parkPhase4Btn, parkStopBtn, showImgBtn;
     private ScrollView scrollLog;
-    private SimpleDraweeView img;
+    private SimpleDraweeView sequenceLayerTakenFrame;
+    private View layerControl, layerLog, layerSequences;
 
 
     private int mNbMaxDownload;
     private int mCurrentDownloadIndex;
 
-    public DroneTimeMoves mDroneTimeMoves;
+    public DroneActionsQueue mDroneActionsQueue;
     public LandOnQrCode mLandOnQrCode;
 
     public String lastImgPath;
@@ -117,9 +118,9 @@ public class BebopActivity extends AppCompatActivity {
         setContentView(R.layout.activity_bebop);
 
         initIHM();
-        toggleViewControl(View.VISIBLE);
-        toggleViewControl2(View.GONE);
-        toggleViewLog(View.GONE);
+        toggleLayerControl(View.VISIBLE);
+        toggleLayerSequence(View.GONE);
+        toggleLayerLog(View.GONE);
 
         Intent intent = getIntent();
         ARDiscoveryDeviceService service = intent.getParcelableExtra(DeviceListActivity.EXTRA_DEVICE_SERVICE);
@@ -160,7 +161,7 @@ public class BebopActivity extends AppCompatActivity {
         // hide foto
         if (imageShown){
             imageShown = false;
-            img.setVisibility(View.INVISIBLE);
+            sequenceLayerTakenFrame.setVisibility(View.INVISIBLE);
             return;
         }
 
@@ -188,27 +189,27 @@ public class BebopActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.menu_view_control:
-                toggleViewControl(View.VISIBLE);
-                toggleViewControl2(View.GONE);
-                toggleViewLog(View.GONE);
+                toggleLayerControl(View.VISIBLE);
+                toggleLayerSequence(View.GONE);
+                toggleLayerLog(View.GONE);
                 break;
 
             case R.id.menu_view_control2:
-                toggleViewControl(View.GONE);
-                toggleViewControl2(View.VISIBLE);
-                toggleViewLog(View.GONE);
+                toggleLayerControl(View.GONE);
+                toggleLayerSequence(View.VISIBLE);
+                toggleLayerLog(View.GONE);
                 break;
 
             case R.id.menu_view_log:
-                toggleViewControl(View.GONE);
-                toggleViewControl2(View.GONE);
-                toggleViewLog(View.VISIBLE);
+                toggleLayerControl(View.GONE);
+                toggleLayerSequence(View.GONE);
+                toggleLayerLog(View.VISIBLE);
                 break;
 
             case R.id.menu_view_drone_stream:
-                toggleViewControl(View.GONE);
-                toggleViewControl2(View.GONE);
-                toggleViewLog(View.GONE);
+                toggleLayerControl(View.GONE);
+                toggleLayerSequence(View.GONE);
+                toggleLayerLog(View.GONE);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -222,43 +223,23 @@ public class BebopActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    private void toggleViewControl(int visibility){
-        gazUpBt.setVisibility(visibility);
-        gazDownBt.setVisibility(visibility);
-        yawLeftBt.setVisibility(visibility);
-        yawRightBt.setVisibility(visibility);
-        forwardBt.setVisibility(visibility);
-        backBt.setVisibility(visibility);
-        rollLeftBt.setVisibility(visibility);
-        rollRightBt.setVisibility(visibility);
-        mDownloadBt.setVisibility(visibility);
-        takePictureBt.setVisibility(visibility);
-
-        mTakeOffLandBt.setVisibility(visibility);
-        cameraCenter.setVisibility(visibility);
-        cameraDown.setVisibility(visibility);
-
-        textViewLabelRoll.setVisibility(visibility);
-        textViewLabelYaw.setVisibility(visibility);
-
-    }
-    private void toggleViewControl2(int visibility){
-        parkPhase1Btn.setVisibility(visibility);
-        parkPhase2Btn.setVisibility(visibility);
-        parkPhase3Btn.setVisibility(visibility);
-        parkStopBtn.setVisibility(visibility);
-        showImgBtn.setVisibility(visibility);
+    private void toggleLayerControl(int visibility){
+        layerControl.setVisibility(visibility);
     }
 
-    private void toggleViewLog(int visibility){
-        textViewLog.setVisibility(visibility);
-        landWidthTv.setVisibility(visibility);
-        landHeightTv.setVisibility(visibility);
-        landRotationTv.setVisibility(visibility);
-        landVerticalTv.setVisibility(visibility);
+    private void toggleLayerSequence(int visibility){
+        layerSequences.setVisibility(visibility);
+    }
+
+    private void toggleLayerLog(int visibility){
+        layerLog.setVisibility(visibility);
     }
 
     private void initIHM() {
+        layerControl = findViewById(R.id.layer_controls);
+        layerLog = findViewById(R.id.layer_log);
+        layerSequences = findViewById(R.id.layer_sequences);
+
         myLandingPatternLayerView = (LandingPatternLayerView) findViewById(R.id.myDrawLayer);
 
         landWidthTv = (TextView) findViewById(R.id.landWidthTv);
@@ -273,8 +254,8 @@ public class BebopActivity extends AppCompatActivity {
         textViewLog.setText("");
         scrollLog = (ScrollView) findViewById(R.id.scrollLog);
 
-        img = (SimpleDraweeView) findViewById(R.id.sdvImage);
-        img.setVisibility(View.GONE);
+        sequenceLayerTakenFrame = (SimpleDraweeView) findViewById(R.id.sequenceTakenFrame);
+        sequenceLayerTakenFrame.setVisibility(View.GONE);
 
         mVideoView = (BebopVideoView) findViewById(R.id.videoView);
         mVideoView.setSurfaceTextureListener(mVideoView);
@@ -598,6 +579,13 @@ public class BebopActivity extends AppCompatActivity {
                 launchPhase3();
             }
         });
+        parkPhase4Btn = ((Button) findViewById(R.id.parkPhase4Btn));
+        parkPhase4Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                launchPhase4();
+            }
+        });
         parkStopBtn = ((Button) findViewById(R.id.parkStopBtn));
         parkStopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -663,9 +651,9 @@ public class BebopActivity extends AppCompatActivity {
         public void onPictureTaken(ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
             // Log.d(TAG, "Picture has been taken err:" + error.getValue());
 
-            // if DroneTimeMoves download image automatically
+            // if DroneActionsQueue download image automatically
             if (error == ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_OK){
-                if (mDroneTimeMoves.isInProgress()){
+                if (mDroneActionsQueue.isInProgress()){
                     mBebopDrone.getLastFlightMedias();
                 }
             }
@@ -739,16 +727,15 @@ public class BebopActivity extends AppCompatActivity {
 
         @Override
         public void onGpsChanged(double lat, double lng, double alt) {
-            //TODO svb
-
+            //use GPS ?
         }
     };
 
     private void showLastImage(){
         if (lastImgPath != null) {
             Uri imageUri = Uri.fromFile(new File(lastImgPath));
-            img.setImageURI(imageUri);
-            img.setVisibility(View.VISIBLE);
+            sequenceLayerTakenFrame.setImageURI(imageUri);
+            sequenceLayerTakenFrame.setVisibility(View.VISIBLE);
             imageShown = true;
         }else{
             Toast.makeText(getApplicationContext(), "foto not available", Toast.LENGTH_SHORT).show();
@@ -792,12 +779,14 @@ public class BebopActivity extends AppCompatActivity {
      * 3) land algorithm
      */
     private void launchPhase1(){
-        List<DroneMoveIface> moves = new ArrayList<DroneMoveIface>();
-        moves.add(new TimeMoveCameraView(TimeMoveCameraView.VIEW_DOWN));
-        moves.add(new TimeMoveTakeOff());
-        moves.add(new ConditionMoveLandQrCode(2*60*1000));
-        mDroneTimeMoves = new DroneTimeMoves(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
-        mDroneTimeMoves.start();
+        if (stopPhase()) return;
+
+        List<DroneActionIface> moves = new ArrayList<DroneActionIface>();
+        moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_DOWN));
+        moves.add(new SimpleActionTakeOff());
+        moves.add(new ConditionActionLandQrCode(2*60*1000));
+        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        mDroneActionsQueue.start();
     }
 
     /**
@@ -811,17 +800,34 @@ public class BebopActivity extends AppCompatActivity {
      * 5) land algorithm
      */
     private void launchPhase2(){
-        List<DroneMoveIface> moves = new ArrayList<DroneMoveIface>();
-        moves.add(new TimeMoveCameraView(TimeMoveCameraView.VIEW_FORWARD));
-        moves.add(new TimeMoveTakeOff());
-        moves.add(new TimeMoveUp(TimeMoveIface.SPEED_FAST, 1000));
-        moves.add(new TimeMoveSleep(2500));
-        moves.add(new ConditionMoveTakePicture());
-        moves.add(new TimeMoveSleep(2500));
-        moves.add(new TimeMoveDown(TimeMoveIface.SPEED_FAST, 5000));
-        moves.add(new ConditionMoveLandQrCode(2*60*1000));
-        mDroneTimeMoves = new DroneTimeMoves(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
-        mDroneTimeMoves.start();
+        if (stopPhase()) return;
+
+        List<DroneActionIface> moves = new ArrayList<DroneActionIface>();
+        moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_FORWARD));
+        moves.add(new SimpleActionTakeOff());
+        moves.add(new DroneMoveUp(MoveActionIface.SPEED_FAST, 1000));
+        moves.add(new ConditionActionTakePicture());
+        moves.add(new SimpleActionMoveSleep(5000));
+        moves.add(new DroneMoveDown(MoveActionIface.SPEED_FAST, 5000));
+        moves.add(new ConditionActionLandQrCode(2 * 60 * 1000));
+        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        mDroneActionsQueue.start();
+    }
+
+    /**
+     * 1) camera down
+     * 2) take off
+     * 3) qr code read instructions
+     */
+    private void launchPhase3(){
+        if (stopPhase()) return;
+
+        List<DroneActionIface> moves = new ArrayList<DroneActionIface>();
+        moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_DOWN));
+        moves.add(new SimpleActionTakeOff());
+        // TODO read QR code action
+        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        mDroneActionsQueue.start();
     }
 
     /**
@@ -829,40 +835,45 @@ public class BebopActivity extends AppCompatActivity {
      * 1) camera down
      * 2) take off
      * 3) move 5m up (save interesting points)
-     * 4) wait 5sec
+     * 4) take picture
      * 4) move 5m down (use interesting point to recover)
      * 5) land algorithm
      */
-    private void launchPhase3(){
+    private void launchPhase4(){
+        if (stopPhase()) return;
+
         // TODO create stack feature
-        Toast.makeText(getApplicationContext(), "phase 3 TODO", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "phase 4 TODO", Toast.LENGTH_LONG).show();
     }
 
     /**
-     * stop all drone time moves
+     * stop drone action queue
      */
-    private void stopPhase(){
-        if (mDroneTimeMoves != null) {
-            mDroneTimeMoves.stop(mBebopDrone, mLandOnQrCode);
+    private boolean stopPhase(){
+        if (mDroneActionsQueue != null && mDroneActionsQueue.isInProgress()) {
+            mDroneActionsQueue.stop(mBebopDrone, mLandOnQrCode);
+            return true;
         }
+
+        return false;
     }
 
     private void testTimeMoves(){
-        List<DroneMoveIface> moves = new ArrayList<DroneMoveIface>();
-        moves.add(new TimeMoveTakeOff());
-        moves.add(new TimeMoveCameraView(TimeMoveCameraView.VIEW_DOWN));
-        moves.add(new TimeMoveRotateLeft(TimeMoveRotateLeft.SPEED_FAST, 2000));
-        moves.add(new TimeMoveRotateRight(TimeMoveRotateLeft.SPEED_FAST, 2000));
-        moves.add(new TimeMoveCameraView(TimeMoveCameraView.VIEW_FORWARD));
-        moves.add(new TimeMoveUp(1000));
-        moves.add(new TimeMoveDown(1000));
-        moves.add(new TimeMoveForward(2000));
-        moves.add(new TimeMoveBackward(2000));
-        moves.add(new TimeMoveLeft(1500));
-        moves.add(new TimeMoveSleep(2000));
-        moves.add(new TimeMoveRight(1500));
-        moves.add(new TimeMoveLand());
-        mDroneTimeMoves = new DroneTimeMoves(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
-        mDroneTimeMoves.start();
+        List<DroneActionIface> moves = new ArrayList<DroneActionIface>();
+        moves.add(new SimpleActionTakeOff());
+        moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_DOWN));
+        moves.add(new DroneMoveRotateLeft(DroneMoveRotateLeft.SPEED_FAST, 2000));
+        moves.add(new DroneMoveRotateRight(DroneMoveRotateLeft.SPEED_FAST, 2000));
+        moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_FORWARD));
+        moves.add(new DroneMoveUp(1000));
+        moves.add(new DroneMoveDown(1000));
+        moves.add(new DroneMoveForward(2000));
+        moves.add(new DroneMoveBackward(2000));
+        moves.add(new DroneMoveLeft(1500));
+        moves.add(new SimpleActionMoveSleep(2000));
+        moves.add(new DroneMoveRight(1500));
+        moves.add(new SimpleActionLand());
+        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        mDroneActionsQueue.start();
     }
 }

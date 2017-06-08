@@ -2,17 +2,16 @@ package com.parrot.sdksample.models.time_move.controllers;
 
 import com.parrot.sdksample.drone.BebopDrone;
 import com.parrot.sdksample.models.qr_code_landing.LandOnQrCode;
-import com.parrot.sdksample.models.time_move.iface.ConditionMoveIface;
-import com.parrot.sdksample.models.time_move.iface.DroneMoveIface;
+import com.parrot.sdksample.models.time_move.iface.ConditionActionIface;
 
 /**
  * Created by mbodis on 6/4/17.
  */
 
-public class ConditionMoveTakePicture extends ConditionMoveIface {
+public class ConditionActionTakePicture extends ConditionActionIface {
 
 
-    public ConditionMoveTakePicture() {
+    public ConditionActionTakePicture() {
         super(250);
     }
 

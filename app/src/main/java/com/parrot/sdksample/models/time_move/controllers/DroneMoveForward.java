@@ -1,27 +1,27 @@
 package com.parrot.sdksample.models.time_move.controllers;
 
 import com.parrot.sdksample.drone.BebopDrone;
-import com.parrot.sdksample.models.time_move.iface.TimeMoveIface;
+import com.parrot.sdksample.models.time_move.iface.MoveActionIface;
 
 /**
  * Created by mbodis on 6/4/17.
  */
 
-public class TimeMoveBackward extends TimeMoveIface {
+public class DroneMoveForward extends MoveActionIface {
 
-    public static final String TAG = TimeMoveBackward.class.getName();
+    public static final String TAG = DroneMoveForward.class.getName();
 
-    public TimeMoveBackward(int speed, int durationMilis) {
+    public DroneMoveForward(int speed, int durationMilis) {
         super(DIRECTION_BACKWARD, speed, durationMilis);
     }
 
-    public TimeMoveBackward(int durationMilis) {
-        super(DIRECTION_BACKWARD, SPEED_NORMAL, durationMilis);
+    public DroneMoveForward(int durationMilis) {
+        super(DIRECTION_FORWARD, SPEED_NORMAL, durationMilis);
     }
 
     @Override
     public void executeOnMoveStarts(BebopDrone mBebopDrone) {
-        mBebopDrone.setPitch((byte) -speed);
+        mBebopDrone.setPitch((byte) speed);
         mBebopDrone.setFlag((byte) 1);
     }
 

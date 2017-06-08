@@ -6,7 +6,7 @@ import com.parrot.sdksample.drone.BebopDrone;
  * Created by mbodis on 6/3/17.
  */
 
-public abstract class TimeMoveIface extends DroneMoveIface {
+public abstract class MoveActionIface extends DroneActionIface {
 
     public static final int DIRECTION_UNDEFINED = -1;
     public static final int DIRECTION_UP = 0;
@@ -29,18 +29,18 @@ public abstract class TimeMoveIface extends DroneMoveIface {
     protected int direction = DIRECTION_UNDEFINED;
     protected int speed = SPEED_UNDEFINED;
 
-    public TimeMoveIface(int direction, int speed, int durationMilis){
+    public MoveActionIface(int direction, int speed, int durationMilis){
         this.direction = direction;
         this.speed = speed;
         this.durationMilis = durationMilis;
     }
 
-    public TimeMoveIface(int speed, int durationMilis){
+    public MoveActionIface(int speed, int durationMilis){
         this.speed = speed;
         this.durationMilis = durationMilis;
     }
 
-    public TimeMoveIface(int durationMilis){
+    public MoveActionIface(int durationMilis){
         this.durationMilis = durationMilis;
     }
 
