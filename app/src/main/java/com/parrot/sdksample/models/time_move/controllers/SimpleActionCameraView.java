@@ -23,7 +23,7 @@ public class SimpleActionCameraView extends SimpleActionIface{
     }
 
     @Override
-    public void executeAction(BebopDrone mBebopDrone, LandOnQrCode mLandOnQrCode) {
+    public void executeAction(BebopDrone mBebopDrone) {
         switch (viewMode){
             case VIEW_DOWN:
                 mBebopDrone.setCameraOrientationV2((byte) -100, (byte) 0);

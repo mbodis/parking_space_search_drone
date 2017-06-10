@@ -18,7 +18,7 @@ public class SimpleActionLand extends SimpleActionIface{
     }
 
     @Override
-    public void executeAction(BebopDrone mBebopDrone, LandOnQrCode mLandOnQrCode) {
+    public void executeAction(BebopDrone mBebopDrone) {
         mBebopDrone.land();
     }
 }

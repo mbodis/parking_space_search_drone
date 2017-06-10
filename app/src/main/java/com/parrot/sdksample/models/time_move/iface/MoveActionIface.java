@@ -22,7 +22,7 @@ public abstract class MoveActionIface extends DroneActionIface {
     public static final int SPEED_SLOW = 5;
     public static final int SPEED_NORMAL = 10;
     public static final int SPEED_FAST = 15;
-    public static final int SPEED_EXTRA_FAST = 20;
+    public static final int SPEED_EXTRA_FAST = 30;
 
     protected long durationMilis = 0;
 

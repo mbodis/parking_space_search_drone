@@ -336,7 +336,8 @@ public class BebopDrone {
             mSDCardModule.getFlightMedias(runId);
         } else {
             Log.e(TAG, "RunID not available, fallback to the day's medias");
-            mSDCardModule.getTodaysFlightMedias();
+            //mSDCardModule.getTodaysFlightMedias();
+            mSDCardModule.getLastFlightMedias();
         }
     }
 
@@ -569,7 +570,6 @@ public class BebopDrone {
                     double latitude = (double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_POSITIONCHANGED_LATITUDE);
                     double longitude = (double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_POSITIONCHANGED_LONGITUDE);
                     double altitude = (double)args.get(ARFeatureARDrone3.ARCONTROLLER_DICTIONARY_KEY_ARDRONE3_PILOTINGSTATE_POSITIONCHANGED_ALTITUDE);
-                    //Log.d("SVB", "latitude : "+ latitude + " longitude: " + longitude + " altitude:" + altitude);
                     notifyGpsChanged(latitude, longitude, altitude);
                 }
             }

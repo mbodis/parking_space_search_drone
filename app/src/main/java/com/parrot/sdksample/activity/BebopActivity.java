@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -34,7 +35,7 @@ import com.parrot.sdksample.drone.BebopDrone;
 import com.parrot.sdksample.models.qr_code_landing.LandOnQrCode;
 import com.parrot.sdksample.models.time_move.DroneActionsQueue;
 import com.parrot.sdksample.models.time_move.controllers.ConditionActionLandQrCode;
-import com.parrot.sdksample.models.time_move.controllers.ConditionActionTakePicture;
+import com.parrot.sdksample.models.time_move.controllers.SimpleActionTakePicture;
 import com.parrot.sdksample.models.time_move.controllers.DroneMoveBackward;
 import com.parrot.sdksample.models.time_move.controllers.SimpleActionCameraView;
 import com.parrot.sdksample.models.time_move.controllers.DroneMoveDown;
@@ -72,7 +73,7 @@ public class BebopActivity extends AppCompatActivity {
     private BebopVideoView mVideoView;
     private LandingPatternLayerView myLandingPatternLayerView;
 
-    private TextView mBatteryLabel, textViewLog, textViewLabelRoll, textViewLabelYaw,
+    private TextView textViewLog, textViewLabelRoll, textViewLabelYaw,
     landWidthTv, landHeightTv, landRotationTv, landVerticalTv;
     private Button mTakeOffLandBt, mDownloadBt, takePictureBt, gazUpBt, gazDownBt,
             yawLeftBt, yawRightBt, forwardBt, backBt, rollLeftBt, rollRightBt, cameraDown,
@@ -556,8 +557,6 @@ public class BebopActivity extends AppCompatActivity {
             }
         });
 
-        mBatteryLabel = (TextView) findViewById(R.id.batteryLabel);
-
         parkPhase1Btn = ((Button) findViewById(R.id.parkPhase1Btn));
         parkPhase1Btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -624,7 +623,7 @@ public class BebopActivity extends AppCompatActivity {
 
         @Override
         public void onBatteryChargeChanged(int batteryPercentage) {
-            mBatteryLabel.setText(String.format("%d%%", batteryPercentage));
+            ((ActionBar)getSupportActionBar()).setTitle("battery: " + String.format("%d%%", batteryPercentage));
         }
 
         @Override
@@ -649,7 +648,7 @@ public class BebopActivity extends AppCompatActivity {
 
         @Override
         public void onPictureTaken(ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM error) {
-            // Log.d(TAG, "Picture has been taken err:" + error.getValue());
+            //Log.d(TAG, "Picture has been taken err:" + error.getValue());
 
             // if DroneActionsQueue download image automatically
             if (error == ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_ENUM.ARCOMMANDS_ARDRONE3_MEDIARECORDEVENT_PICTUREEVENTCHANGED_ERROR_OK){
@@ -674,7 +673,9 @@ public class BebopActivity extends AppCompatActivity {
         @Override
         public void onMatchingMediasFound(int nbMedias) {
             //Log.d(TAG, "onMatchingMediasFound");
-            mDownloadProgressDialog.dismiss();
+            if (mDownloadProgressDialog != null) {
+                mDownloadProgressDialog.dismiss();
+            }
 
             mNbMaxDownload = nbMedias;
             mCurrentDownloadIndex = 1;
@@ -713,7 +714,13 @@ public class BebopActivity extends AppCompatActivity {
             File newPhoto = new File(externalDirectory + mediaName);
             if (newPhoto.exists()) {
                 lastImgPath = newPhoto.getAbsolutePath();
+                showLastImage();
                 Toast.makeText(getApplicationContext(), "photo downloaded", Toast.LENGTH_SHORT).show();
+
+                // stop downloading
+                mBebopDrone.cancelGetLastFlightMedias();
+                // hide download dialog
+                mDownloadProgressDialog.cancel();
             }
 
             mCurrentDownloadIndex++;
@@ -802,13 +809,17 @@ public class BebopActivity extends AppCompatActivity {
     private void launchPhase2(){
         if (stopPhase()) return;
 
+        int timeUp = 6000; // 6 ssc
+        int timeDown = 3000; // 3 ssc
         List<DroneActionIface> moves = new ArrayList<DroneActionIface>();
         moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_FORWARD));
         moves.add(new SimpleActionTakeOff());
-        moves.add(new DroneMoveUp(MoveActionIface.SPEED_FAST, 1000));
-        moves.add(new ConditionActionTakePicture());
-        moves.add(new SimpleActionMoveSleep(5000));
-        moves.add(new DroneMoveDown(MoveActionIface.SPEED_FAST, 5000));
+        moves.add(new DroneMoveUp(MoveActionIface.SPEED_EXTRA_FAST, timeUp));
+        moves.add(new SimpleActionMoveSleep(1000));
+        moves.add(new SimpleActionTakePicture());
+        moves.add(new SimpleActionMoveSleep(2000));
+        moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_DOWN));
+        moves.add(new DroneMoveDown(MoveActionIface.SPEED_EXTRA_FAST, timeDown));
         moves.add(new ConditionActionLandQrCode(2 * 60 * 1000));
         mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
         mDroneActionsQueue.start();
@@ -822,12 +833,14 @@ public class BebopActivity extends AppCompatActivity {
     private void launchPhase3(){
         if (stopPhase()) return;
 
-        List<DroneActionIface> moves = new ArrayList<DroneActionIface>();
-        moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_DOWN));
-        moves.add(new SimpleActionTakeOff());
-        // TODO read QR code action
-        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
-        mDroneActionsQueue.start();
+        Toast.makeText(getApplicationContext(), "phase 3 TODO", Toast.LENGTH_LONG).show();
+
+//        List<DroneActionIface> moves = new ArrayList<DroneActionIface>();
+//        moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_DOWN));
+//        moves.add(new SimpleActionTakeOff());
+//        // TODO read QR code action
+//        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+//        mDroneActionsQueue.start();
     }
 
     /**

@@ -5,7 +5,7 @@
         android:title="control" />
     <item
         android:id="@+id/menu_view_control2"
-        android:title="control 2" />
+        android:title="sequences" />
     <item
         android:id="@+id/menu_view_log"
         android:title="log" />

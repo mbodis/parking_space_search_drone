@@ -21,7 +21,7 @@ public class SimpleActionTakeOff extends SimpleActionIface{
     }
 
     @Override
-    public void executeAction(BebopDrone mBebopDrone, LandOnQrCode mLandOnQrCode) {
+    public void executeAction(BebopDrone mBebopDrone) {
         if (mBebopDrone.getFlyingState() == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_LANDED) {
             mBebopDrone.takeOff();
         }else{

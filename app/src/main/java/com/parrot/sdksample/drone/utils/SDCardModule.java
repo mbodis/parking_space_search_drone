@@ -176,6 +176,37 @@ public class SDCardModule {
         }
     }
 
+    public void getLastFlightMedias() {
+        if (!mThreadIsRunning) {
+            mThreadIsRunning = true;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    ArrayList<ARDataTransferMedia> mediaList = getMediaList();
+
+                    ARDataTransferMedia mediasFromDate = null;
+                    mNbMediasToDownload = 0;
+                    if ((mediaList != null) && !mIsCancelled) {
+                        GregorianCalendar today = new GregorianCalendar();
+                        mediasFromDate = getLastMediasByDate(mediaList, today);
+                        mNbMediasToDownload = (mediasFromDate == null) ? 0 : 1;
+                    }
+
+                    notifyMatchingMediasFound(mNbMediasToDownload);
+
+                    if ((mediasFromDate != null) && (mNbMediasToDownload != 0) && !mIsCancelled) {
+                        ArrayList<ARDataTransferMedia> listToDownload = new ArrayList<ARDataTransferMedia>();
+                        listToDownload.add(mediasFromDate);
+                        downloadMedias(listToDownload);
+                    }
+
+                    mThreadIsRunning = false;
+                    mIsCancelled = false;
+                }
+            }).start();
+        }
+    }
+
     public void cancelGetFlightMedias() {
         if (mThreadIsRunning) {
             mIsCancelled = true;
@@ -267,6 +298,37 @@ public class SDCardModule {
         }
 
         return matchingMedias;
+    }
+
+    private ARDataTransferMedia getLastMediasByDate(ArrayList<ARDataTransferMedia> mediaList,
+                                                                 GregorianCalendar matchingCal) {
+        ARDataTransferMedia matchingMedia = null;
+        Calendar mediaCal = new GregorianCalendar();
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HHmmss", Locale.getDefault());
+        for (ARDataTransferMedia media : mediaList) {
+            // convert date in string to calendar
+            String dateStr = media.getDate();
+            try {
+                Date mediaDate = dateFormatter.parse(dateStr);
+                mediaCal.setTime(mediaDate);
+
+                // if the date are the same day
+                if ((mediaCal.get(Calendar.DAY_OF_MONTH) == (matchingCal.get(Calendar.DAY_OF_MONTH))) &&
+                        (mediaCal.get(Calendar.MONTH) == (matchingCal.get(Calendar.MONTH))) &&
+                        (mediaCal.get(Calendar.YEAR) == (matchingCal.get(Calendar.YEAR)))) {
+                    matchingMedia = media;
+                }
+            } catch (ParseException e) {
+                Log.e(TAG, "Exception", e);
+            }
+
+            // exit if the async task is cancelled
+            if (mIsCancelled) {
+                break;
+            }
+        }
+
+        return matchingMedia;
     }
 
     private void downloadMedias(@NonNull ArrayList<ARDataTransferMedia> matchingMedias) {
