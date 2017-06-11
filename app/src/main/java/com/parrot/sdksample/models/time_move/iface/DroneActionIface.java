@@ -10,6 +10,7 @@ public abstract class DroneActionIface {
 
     private static final String TAG = DroneActionIface.class.getName();
 
+    private String actionName;
     protected long startTimeMilis = 0;
 
     private boolean actionStarted = false;
@@ -33,5 +34,13 @@ public abstract class DroneActionIface {
 
     public void setActionFinished(boolean newState){
         actionFinished = newState;
+    }
+
+    public String getActionName() {
+        return actionName;
+    }
+
+    public void setActionName(String actionName) {
+        this.actionName = actionName;
     }
 }

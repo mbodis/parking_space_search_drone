@@ -14,6 +14,8 @@ import com.parrot.sdksample.utils.TwoDimensionalSpace;
 
 public class UpDownController extends MoveControllerIface {
 
+    private static final boolean LOCAL_DEBUG = false;
+
     private static final long TS_UP_DOWN_MOVE = 2*TS_COMMON_MOVE;
     private static final long TS_UP_DOWN_PAUSE = TS_COMMON_PAUSE;
 
@@ -57,7 +59,7 @@ public class UpDownController extends MoveControllerIface {
             }
 
             if (verticalShiftPx < UP_DOWN_WIDTH_FAR_TOO_HIGH) {
-                BebopActivity.addTextLogIntent(ctx, "move down -> startFAST " + (int) verticalShiftPx);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move down -> startFAST " + (int) verticalShiftPx);
                 mBebopDrone.setGaz((byte) -SPEED_UP_DOWN_FAST);
                 upDown = true;
                 upDownEndMoveTs = System.currentTimeMillis() + TS_UP_DOWN_MOVE;
@@ -65,7 +67,7 @@ public class UpDownController extends MoveControllerIface {
                 upDownDirection = DIRECTION_DOWN;
 
             }else if (verticalShiftPx < UP_DOWN_WIDTH_TOO_HIGH) {
-                BebopActivity.addTextLogIntent(ctx, "move down -> start " + (int) verticalShiftPx);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move down -> start " + (int) verticalShiftPx);
                 mBebopDrone.setGaz((byte) -SPEED_UP_DOWN_NORMAL);
                 upDown = true;
                 upDownEndMoveTs = System.currentTimeMillis() + TS_UP_DOWN_MOVE;
@@ -73,7 +75,7 @@ public class UpDownController extends MoveControllerIface {
                 upDownDirection = DIRECTION_DOWN;
 
             } else if (verticalShiftPx > UP_DOWN_WIDTH_OPTIMAL) {
-                BebopActivity.addTextLogIntent(ctx, "move up -> start slow " + (int) verticalShiftPx);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move up -> start slow " + (int) verticalShiftPx);
                 mBebopDrone.setGaz((byte) SPEED_UP_DOWN_SLOW);
                 upDown = true;
                 upDownEndMoveTs = System.currentTimeMillis() + TS_UP_DOWN_MOVE;
@@ -81,7 +83,7 @@ public class UpDownController extends MoveControllerIface {
                 upDownDirection = DIRECTION_UP;
 
             } else if (verticalShiftPx < UP_DOWN_WIDTH_OPTIMAL) {
-                BebopActivity.addTextLogIntent(ctx, "move down -> start slow " + (int) verticalShiftPx);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move down -> start slow " + (int) verticalShiftPx);
                 mBebopDrone.setGaz((byte) -SPEED_UP_DOWN_SLOW);
                 upDown = true;
                 upDownEndMoveTs = System.currentTimeMillis() + TS_UP_DOWN_MOVE;
@@ -98,19 +100,23 @@ public class UpDownController extends MoveControllerIface {
             if (upDownEndMoveTs > 0) {
                 if (System.currentTimeMillis() > upDownEndMoveTs) {
                     upDownEndMoveTs = 0;
-                    if (upDownDirection == DIRECTION_UP)
-                        BebopActivity.addTextLogIntent(ctx, "move up << stop");
-                    if (upDownDirection == DIRECTION_DOWN)
-                        BebopActivity.addTextLogIntent(ctx, "move down << stop");
+                    if (upDownDirection == DIRECTION_UP){
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move up << stop");
+                    }
+                    if (upDownDirection == DIRECTION_DOWN){
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move down << stop");
+                    }
                     mBebopDrone.setGaz((byte) 0);
                 }
             }
             if (System.currentTimeMillis() > upDownEndPauseTs) {
                 upDownEndPauseTs = 0;
-                if (upDownDirection == DIRECTION_UP)
-                    BebopActivity.addTextLogIntent(ctx, "move up << stop pause");
-                if (upDownDirection == DIRECTION_DOWN)
-                    BebopActivity.addTextLogIntent(ctx, "move down << stop pause");
+                if (upDownDirection == DIRECTION_UP){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move up << stop pause");
+                }
+                if (upDownDirection == DIRECTION_DOWN){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move down << stop pause");
+                }
                 upDown = false;
             }
         }

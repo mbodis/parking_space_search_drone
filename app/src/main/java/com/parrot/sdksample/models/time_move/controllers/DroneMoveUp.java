@@ -12,11 +12,11 @@ public class DroneMoveUp extends MoveActionIface {
     public static final String TAG = DroneMoveUp.class.getName();
 
     public DroneMoveUp(int speed, int durationMilis) {
-        super(DIRECTION_UP, speed, durationMilis);
+        super("MoveUp", DIRECTION_UP, speed, durationMilis);
     }
 
     public DroneMoveUp(int durationMilis) {
-        super(DIRECTION_UP, SPEED_NORMAL, durationMilis);
+        super("MoveUp", DIRECTION_UP, SPEED_NORMAL, durationMilis);
     }
 
     @Override

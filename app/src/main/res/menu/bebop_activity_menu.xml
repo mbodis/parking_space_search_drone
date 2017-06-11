@@ -2,15 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/menu_view_control"
-        android:title="control" />
+        android:title="@string/menu_action_controls" />
     <item
         android:id="@+id/menu_view_control2"
-        android:title="sequences" />
+        android:title="@string/menu_action_sequences" />
     <item
         android:id="@+id/menu_view_log"
-        android:title="log" />
+        android:title="@string/menu_action_log" />
     <item
         android:id="@+id/menu_view_drone_stream"
-        android:title="dron camera" />
+        android:title="@string/menu_action_camera" />
 
 </menu>

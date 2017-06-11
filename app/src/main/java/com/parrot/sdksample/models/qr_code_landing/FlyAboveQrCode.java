@@ -22,9 +22,9 @@ import com.parrot.sdksample.models.qr_code_landing.logic.LandingPatternQrCode;
  * Created by mbodis on 4/23/17.
  */
 
-public class LandOnQrCode {
+public class FlyAboveQrCode {
 
-    public static final String TAG = LandOnQrCode.class.getName();
+    public static final String TAG = FlyAboveQrCode.class.getName();
 
     public static final String ACTION_NEW_QR_CODE_STATUS = "new_qr_code_status";
 
@@ -58,7 +58,7 @@ public class LandOnQrCode {
         }
     };
 
-    public LandOnQrCode(final BebopDrone mBebopDrone, final Context ctx) {
+    public FlyAboveQrCode(final BebopDrone mBebopDrone, final Context ctx) {
 
         ctx.registerReceiver(mBroadcastReceiver, new IntentFilter(ACTION_NEW_QR_CODE_STATUS));
         initControllers(ctx, mBebopDrone);
@@ -152,14 +152,29 @@ public class LandOnQrCode {
         mLandingPatternLostController.updateLandingPattern(mLandingPatternQrCode);
     }
 
-    public void setLandingToQrCodeEnabled(boolean isLandingToQrCodeEnabled) {
-        mLandController.setLandToQrCodeEnabled(isLandingToQrCodeEnabled);
-        mLandController.setHasLanded(false);
+    public LandingPatternQrCode getLandingPatternQrCode(){
+        return mLandingPatternQrCode;
     }
 
+    public void setLockToQrCodeEnabled() {
+        mLandController.setLockToQrCodeEnabled(true);
+        mLandController.setLandingConditionsSatisfied(false);
+    }
+
+    public void setLockToQrCodeDisabled() {
+        mLandController.setLockToQrCodeEnabled(false);
+        mLandController.setLandingConditionsSatisfied(false);
+    }
+
+    public void setDroneHasLanded() {
+        mLandController.setLockToQrCodeEnabled(false);
+        mLandController.setLandingConditionsSatisfied(true);
+    }
+
+    // not used, not working properly, large time delay
     public static void updateQrCodeDetectionStatus(Context ctx, LandingPatternQrCode mLandingPatternQrCode){
-        Intent mIntent = new Intent(LandOnQrCode.ACTION_NEW_QR_CODE_STATUS);
-        mIntent.putExtra(LandOnQrCode.NEW_QR_CODE_STATUS_KEY, mLandingPatternQrCode);
+        Intent mIntent = new Intent(FlyAboveQrCode.ACTION_NEW_QR_CODE_STATUS);
+        mIntent.putExtra(FlyAboveQrCode.NEW_QR_CODE_STATUS_KEY, mLandingPatternQrCode);
         ctx.sendBroadcast(mIntent);
     }
 

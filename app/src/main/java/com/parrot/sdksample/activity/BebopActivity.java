@@ -32,9 +32,10 @@ import com.parrot.arsdk.arcontroller.ARControllerCodec;
 import com.parrot.arsdk.arcontroller.ARFrame;
 import com.parrot.arsdk.ardiscovery.ARDiscoveryDeviceService;
 import com.parrot.sdksample.drone.BebopDrone;
-import com.parrot.sdksample.models.qr_code_landing.LandOnQrCode;
+import com.parrot.sdksample.models.qr_code_landing.FlyAboveQrCode;
 import com.parrot.sdksample.models.time_move.DroneActionsQueue;
 import com.parrot.sdksample.models.time_move.controllers.ConditionActionLandQrCode;
+import com.parrot.sdksample.models.time_move.controllers.ConditionActionReadQrCodeInstruction;
 import com.parrot.sdksample.models.time_move.controllers.SimpleActionTakePicture;
 import com.parrot.sdksample.models.time_move.controllers.DroneMoveBackward;
 import com.parrot.sdksample.models.time_move.controllers.SimpleActionCameraView;
@@ -45,7 +46,7 @@ import com.parrot.sdksample.models.time_move.controllers.DroneMoveLeft;
 import com.parrot.sdksample.models.time_move.controllers.DroneMoveRight;
 import com.parrot.sdksample.models.time_move.controllers.DroneMoveRotateLeft;
 import com.parrot.sdksample.models.time_move.controllers.DroneMoveRotateRight;
-import com.parrot.sdksample.models.time_move.controllers.SimpleActionMoveSleep;
+import com.parrot.sdksample.models.time_move.controllers.SimpleActionSleep;
 import com.parrot.sdksample.models.time_move.controllers.SimpleActionTakeOff;
 import com.parrot.sdksample.models.time_move.controllers.DroneMoveUp;
 import com.parrot.sdksample.models.time_move.iface.DroneActionIface;
@@ -87,7 +88,7 @@ public class BebopActivity extends AppCompatActivity {
     private int mCurrentDownloadIndex;
 
     public DroneActionsQueue mDroneActionsQueue;
-    public LandOnQrCode mLandOnQrCode;
+    public FlyAboveQrCode mFlyAboveQrCode;
 
     public String lastImgPath;
     public boolean imageShown = false;
@@ -128,7 +129,7 @@ public class BebopActivity extends AppCompatActivity {
         mBebopDrone = new BebopDrone(this, service);
         mBebopDrone.addListener(mBebopListener);
 
-        mLandOnQrCode = new LandOnQrCode(mBebopDrone, getApplicationContext());
+        mFlyAboveQrCode = new FlyAboveQrCode(mBebopDrone, getApplicationContext());
     }
 
     @Override
@@ -219,7 +220,7 @@ public class BebopActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         mBebopDrone.dispose();
-        mLandOnQrCode.destroy(getApplicationContext());
+        mFlyAboveQrCode.destroy(getApplicationContext());
         unregisterReceiver(mBroadcastReceiver);
         super.onDestroy();
     }
@@ -792,7 +793,7 @@ public class BebopActivity extends AppCompatActivity {
         moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_DOWN));
         moves.add(new SimpleActionTakeOff());
         moves.add(new ConditionActionLandQrCode(2*60*1000));
-        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mFlyAboveQrCode, moves);
         mDroneActionsQueue.start();
     }
 
@@ -815,13 +816,13 @@ public class BebopActivity extends AppCompatActivity {
         moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_FORWARD));
         moves.add(new SimpleActionTakeOff());
         moves.add(new DroneMoveUp(MoveActionIface.SPEED_EXTRA_FAST, timeUp));
-        moves.add(new SimpleActionMoveSleep(1000));
+        moves.add(new SimpleActionSleep(1000));
         moves.add(new SimpleActionTakePicture());
-        moves.add(new SimpleActionMoveSleep(2000));
+        moves.add(new SimpleActionSleep(2000));
         moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_DOWN));
         moves.add(new DroneMoveDown(MoveActionIface.SPEED_EXTRA_FAST, timeDown));
         moves.add(new ConditionActionLandQrCode(2 * 60 * 1000));
-        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mFlyAboveQrCode, moves);
         mDroneActionsQueue.start();
     }
 
@@ -833,14 +834,12 @@ public class BebopActivity extends AppCompatActivity {
     private void launchPhase3(){
         if (stopPhase()) return;
 
-        Toast.makeText(getApplicationContext(), "phase 3 TODO", Toast.LENGTH_LONG).show();
-
-//        List<DroneActionIface> moves = new ArrayList<DroneActionIface>();
-//        moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_DOWN));
-//        moves.add(new SimpleActionTakeOff());
-//        // TODO read QR code action
-//        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
-//        mDroneActionsQueue.start();
+        List<DroneActionIface> moves = new ArrayList<DroneActionIface>();
+        moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_DOWN));
+        moves.add(new SimpleActionTakeOff());
+        moves.add(new ConditionActionReadQrCodeInstruction());
+        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mFlyAboveQrCode, moves);
+        mDroneActionsQueue.start();
     }
 
     /**
@@ -864,7 +863,7 @@ public class BebopActivity extends AppCompatActivity {
      */
     private boolean stopPhase(){
         if (mDroneActionsQueue != null && mDroneActionsQueue.isInProgress()) {
-            mDroneActionsQueue.stop(mBebopDrone, mLandOnQrCode);
+            mDroneActionsQueue.stop(mBebopDrone, mFlyAboveQrCode);
             return true;
         }
 
@@ -883,10 +882,10 @@ public class BebopActivity extends AppCompatActivity {
         moves.add(new DroneMoveForward(2000));
         moves.add(new DroneMoveBackward(2000));
         moves.add(new DroneMoveLeft(1500));
-        moves.add(new SimpleActionMoveSleep(2000));
+        moves.add(new SimpleActionSleep(2000));
         moves.add(new DroneMoveRight(1500));
         moves.add(new SimpleActionLand());
-        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mLandOnQrCode, moves);
+        mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mFlyAboveQrCode, moves);
         mDroneActionsQueue.start();
     }
 }

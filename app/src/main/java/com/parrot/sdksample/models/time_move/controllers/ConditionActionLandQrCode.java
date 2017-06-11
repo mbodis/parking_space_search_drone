@@ -1,7 +1,8 @@
 package com.parrot.sdksample.models.time_move.controllers;
 
 import com.parrot.sdksample.drone.BebopDrone;
-import com.parrot.sdksample.models.qr_code_landing.LandOnQrCode;
+import com.parrot.sdksample.models.qr_code_landing.FlyAboveQrCode;
+import com.parrot.sdksample.models.time_move.DroneActionsQueue;
 import com.parrot.sdksample.models.time_move.iface.ConditionActionIface;
 
 /**
@@ -11,28 +12,30 @@ import com.parrot.sdksample.models.time_move.iface.ConditionActionIface;
 public class ConditionActionLandQrCode extends ConditionActionIface {
 
     public ConditionActionLandQrCode(long durationMilis) {
-        super(durationMilis);
+        super("LandQrCode", durationMilis);
     }
 
     @Override
-    public void executeOnMoveStarts(BebopDrone mBebopDrone, LandOnQrCode mLandOnQrCode) {
+    public void executeOnMoveStarts(BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode) {
         // launch landing procedure
-        mLandOnQrCode.setLandingToQrCodeEnabled(true);
+        mFlyAboveQrCode.setLockToQrCodeEnabled();
     }
 
     @Override
-    public void executeOnMoveProcess(BebopDrone mBebopDrone, LandOnQrCode mLandOnQrCode) {
-        // do nothing - landing in progress
+    public void executeOnMoveProcess(BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode) {
+        // do nothing - lock to qr code in progress
     }
 
     @Override
-    public void executeOnMoveEnds(BebopDrone mBebopDrone, LandOnQrCode mLandOnQrCode) {
-        // launch landing procedure
-        mLandOnQrCode.setLandingToQrCodeEnabled(true);
+    public void executeOnMoveEnds(BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode, DroneActionsQueue droneActionsQueue) {
+        // land drone
+        mBebopDrone.land();
+        // set drone has landed
+        mFlyAboveQrCode.setDroneHasLanded();
     }
 
     @Override
-    public boolean isConditionSatisfied(LandOnQrCode mLandOnQrCode) {
-        return mLandOnQrCode.mLandController.isHasLanded();
+    public boolean isConditionSatisfied(BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode) {
+        return mFlyAboveQrCode.mLandController.isLandingConditionsSatisfied();
     }
 }

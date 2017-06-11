@@ -13,7 +13,6 @@ import com.parrot.sdksample.activity.BebopActivity;
 import com.parrot.sdksample.models.common.MyPoint;
 import com.parrot.sdksample.models.landing.iface.LandingAreaDetector;
 import com.parrot.sdksample.models.qr_code_landing.logic.LandingPatternQrCode;
-import com.parrot.sdksample.models.qr_code_landing.LandOnQrCode;
 import com.parrot.sdksample.utils.ImageUtils;
 import com.parrot.sdksample.view.LandingPatternLayerView;
 
@@ -80,14 +79,15 @@ public class QrCodeDetector extends LandingAreaDetector {
                 Point p = ((Barcode)barcode).cornerPoints[i];
                 cornerPoints[i] = new MyPoint(p.x, p.y);
             }
+            String rawValue = ((Barcode)barcode).rawValue;
             long ts = System.currentTimeMillis();
-            LandingPatternQrCode mLandingPatternQrCode = new LandingPatternQrCode(ts, center, cornerPoints);
+            LandingPatternQrCode mLandingPatternQrCode = new LandingPatternQrCode(ts, center, cornerPoints, rawValue);
 
             // send pattern via intent - works incorrectly (delay ?)
-            // LandOnQrCode.updateQrCodeDetectionStatus(c, mLandingPatternQrCode);
+            // FlyAboveQrCode.updateQrCodeDetectionStatus(c, mLandingPatternQrCode);
 
             // send pattern directly - works good
-            ((BebopActivity)c).mLandOnQrCode.setLandingPattern(mLandingPatternQrCode);
+            ((BebopActivity)c).mFlyAboveQrCode.setLandingPattern(mLandingPatternQrCode);
         }
         drawLayer.toggleDrawView();
         drawLayer.invalidate();

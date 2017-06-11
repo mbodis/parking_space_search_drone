@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Parking Space Drone</string>
+
+    <string name="menu_action_controls">controls</string>
+    <string name="menu_action_sequences">sequences</string>
+    <string name="menu_action_log">log</string>
+    <string name="menu_action_camera">camera view</string>
 </resources>

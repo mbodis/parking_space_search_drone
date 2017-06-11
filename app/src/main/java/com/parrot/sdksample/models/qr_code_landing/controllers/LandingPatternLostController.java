@@ -16,6 +16,8 @@ import com.parrot.sdksample.models.landing.iface.MoveControllerIface;
  */
 public class LandingPatternLostController extends MoveControllerIface {
 
+    private static final boolean LOCAL_DEBUG = false;
+
     private static final long TS_LIMIT_QR_SHORT_TIME_MISSING = 500;
 
     private static final byte SPEED_FORWARD_BACKWARD = 10;
@@ -52,7 +54,7 @@ public class LandingPatternLostController extends MoveControllerIface {
                     if (!forwardBackward) {
                         // qr code was last time in front, drone moved too backward, move forward to see QR code
                         if (centerHeight < 30) {
-                            BebopActivity.addTextLogIntent(ctx, "go forward QR missing -> start " + (int) centerHeight);
+                            if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "go forward QR missing -> start " + (int) centerHeight);
                             mBebopDrone.setPitch((byte) SPEED_FORWARD_BACKWARD);
                             mBebopDrone.setFlag((byte) 1);
                             forwardBackward = true;
@@ -62,7 +64,7 @@ public class LandingPatternLostController extends MoveControllerIface {
 
                             // qr code was last time in back, drone moved too forward, move backward to see QR code
                         } else if (centerHeight > 70) {
-                            BebopActivity.addTextLogIntent(ctx, "go backward QR missing -> start " + (int)centerHeight);
+                            if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "go backward QR missing -> start " + (int)centerHeight);
                             mBebopDrone.setPitch((byte) -SPEED_FORWARD_BACKWARD);
                             mBebopDrone.setFlag((byte) 1);
                             forwardBackward = true;
@@ -83,20 +85,24 @@ public class LandingPatternLostController extends MoveControllerIface {
             if (forwardBackwardEndOfMoveTs > 0) {
                 if (System.currentTimeMillis() > forwardBackwardEndOfMoveTs) {
                     forwardBackwardEndOfMoveTs = 0;
-                    if (forwardBackwardDirection == DIRECTION_FORWARD)
-                        BebopActivity.addTextLogIntent(ctx, "move forward << stop");
-                    if (forwardBackwardDirection == DIRECTION_BACKWARD)
-                        BebopActivity.addTextLogIntent(ctx, "move backward << stop");
+                    if (forwardBackwardDirection == DIRECTION_FORWARD) {
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move forward << stop");
+                    }
+                    if (forwardBackwardDirection == DIRECTION_BACKWARD){
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move backward << stop");
+                    }
                     mBebopDrone.setPitch((byte) 0);
                     mBebopDrone.setFlag((byte) 0);
                 }
             }
             if (System.currentTimeMillis() > forwardBackwardEndOfPauseTs) {
                 forwardBackwardEndOfPauseTs = 0;
-                if (forwardBackwardDirection == DIRECTION_FORWARD)
-                    BebopActivity.addTextLogIntent(ctx, "move forward << stop pause");
-                if (forwardBackwardDirection == DIRECTION_BACKWARD)
-                    BebopActivity.addTextLogIntent(ctx, "move backward << stop pause");
+                if (forwardBackwardDirection == DIRECTION_FORWARD){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move forward << stop pause");
+                }
+                if (forwardBackwardDirection == DIRECTION_BACKWARD){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move backward << stop pause");
+                }
                 forwardBackward = false;
             }
         }

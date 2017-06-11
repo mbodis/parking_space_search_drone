@@ -1,7 +1,6 @@
 package com.parrot.sdksample.models.time_move.controllers;
 
 import com.parrot.sdksample.drone.BebopDrone;
-import com.parrot.sdksample.models.qr_code_landing.LandOnQrCode;
 import com.parrot.sdksample.models.time_move.iface.SimpleActionIface;
 
 /**
@@ -18,7 +17,7 @@ public class SimpleActionCameraView extends SimpleActionIface{
     int viewMode = VIEW_FORWARD;
 
     public SimpleActionCameraView(int viewMode) {
-        super(250);
+        super("CameraView", 250);
         this.viewMode = viewMode;
     }
 

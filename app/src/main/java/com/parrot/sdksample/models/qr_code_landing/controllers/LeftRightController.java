@@ -13,6 +13,8 @@ import com.parrot.sdksample.models.landing.iface.MoveControllerIface;
 
 public class LeftRightController extends MoveControllerIface {
 
+    private static final boolean LOCAL_DEBUG = false;
+
     private static final long TS_LEFT_RIGHT_MOVE = TS_COMMON_MOVE;
     private static final long TS_LEFT_RIGHT_PAUSE = TS_COMMON_PAUSE;
 
@@ -56,7 +58,7 @@ public class LeftRightController extends MoveControllerIface {
             }
 
             if (centerWidth < LEFT_RIGHT_LIMIT_PERCENTAGE_TOP_FAR) {
-                BebopActivity.addTextLogIntent(ctx, "move left -> startFAR " + (int) centerWidth);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move left -> startFAR " + (int) centerWidth);
                 mBebopDrone.setRoll((byte) -SPEED_LEFT_RIGHT_FAST);
                 mBebopDrone.setFlag((byte) 1);
                 leftRight = true;
@@ -65,7 +67,7 @@ public class LeftRightController extends MoveControllerIface {
                 leftRightDirection = DIRECTION_LEFT;
 
             } else if (centerWidth < LEFT_RIGHT_LIMIT_PERCENTAGE_TOP) {
-                BebopActivity.addTextLogIntent(ctx, "move left -> start " + (int) centerWidth);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move left -> start " + (int) centerWidth);
                 mBebopDrone.setRoll((byte) -SPEED_LEFT_RIGHT);
                 mBebopDrone.setFlag((byte) 1);
                 leftRight = true;
@@ -74,7 +76,7 @@ public class LeftRightController extends MoveControllerIface {
                 leftRightDirection = DIRECTION_LEFT;
 
             } else if (centerWidth > LEFT_RIGHT_LIMIT_PERCENTAGE_BOTTOM_FAR) {
-                BebopActivity.addTextLogIntent(ctx, "move right -> startFAR " + (int) centerWidth);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move right -> startFAR " + (int) centerWidth);
                 mBebopDrone.setRoll((byte) SPEED_LEFT_RIGHT_FAST);
                 mBebopDrone.setFlag((byte) 1);
                 leftRight = true;
@@ -83,7 +85,7 @@ public class LeftRightController extends MoveControllerIface {
                 leftRightDirection = DIRECTION_RIGHT;
 
             } else if (centerWidth > LEFT_RIGHT_LIMIT_PERCENTAGE_BOTTOM) {
-                BebopActivity.addTextLogIntent(ctx, "move right -> start " + (int) centerWidth);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move right -> start " + (int) centerWidth);
                 mBebopDrone.setRoll((byte) SPEED_LEFT_RIGHT);
                 mBebopDrone.setFlag((byte) 1);
                 leftRight = true;
@@ -92,7 +94,7 @@ public class LeftRightController extends MoveControllerIface {
                 leftRightDirection = DIRECTION_RIGHT;
 
             } else if (centerWidth > LEFT_RIGHT_LIMIT_PERCENTAGE_CENTER) {
-                BebopActivity.addTextLogIntent(ctx, "move right -> start slow " + (int) centerWidth);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move right -> start slow " + (int) centerWidth);
                 mBebopDrone.setRoll((byte) SPEED_LEFT_RIGHT_SLOW);
                 mBebopDrone.setFlag((byte) 1);
                 leftRight = true;
@@ -102,7 +104,7 @@ public class LeftRightController extends MoveControllerIface {
 
 
             } else if (centerWidth < LEFT_RIGHT_LIMIT_PERCENTAGE_CENTER) {
-                BebopActivity.addTextLogIntent(ctx, "move left -> start slow " + (int) centerWidth);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move left -> start slow " + (int) centerWidth);
                 mBebopDrone.setRoll((byte) -SPEED_LEFT_RIGHT_SLOW);
                 mBebopDrone.setFlag((byte) 1);
                 leftRight = true;
@@ -126,20 +128,24 @@ public class LeftRightController extends MoveControllerIface {
             if (leftRightEndMoveTs > 0) {
                 if (System.currentTimeMillis() > leftRightEndMoveTs) {
                     leftRightEndMoveTs = 0;
-                    if (leftRightDirection == DIRECTION_LEFT)
-                        BebopActivity.addTextLogIntent(ctx, "move left << stop");
-                    if (leftRightDirection == DIRECTION_RIGHT)
-                        BebopActivity.addTextLogIntent(ctx, "move right << stop");
+                    if (leftRightDirection == DIRECTION_LEFT){
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move left << stop");
+                    }
+                    if (leftRightDirection == DIRECTION_RIGHT){
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move right << stop");
+                    }
                     mBebopDrone.setRoll((byte) 0);
                     mBebopDrone.setFlag((byte) 0);
                 }
             }
             if (System.currentTimeMillis() > leftRightEndPauseTs) {
                 leftRightEndPauseTs = 0;
-                if (leftRightDirection == DIRECTION_LEFT)
-                    BebopActivity.addTextLogIntent(ctx, "move left << stop pause");
-                if (leftRightDirection == DIRECTION_RIGHT)
-                    BebopActivity.addTextLogIntent(ctx, "move right << stop pause");
+                if (leftRightDirection == DIRECTION_LEFT){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move left << stop pause");
+                }
+                if (leftRightDirection == DIRECTION_RIGHT){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move right << stop pause");
+                }
                 leftRight = false;
             }
         }

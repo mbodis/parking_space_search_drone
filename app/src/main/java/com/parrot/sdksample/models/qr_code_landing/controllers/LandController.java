@@ -13,8 +13,8 @@ import static com.parrot.arsdk.arcommands.ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYI
 
 public class LandController {
 
-    private boolean landToQrCodeEnabled = false;
-    private boolean hasLanded = false;
+    private boolean lockToQrCodeEnabled = false;
+    private boolean landingConditionsSatisfied = false;
 
     private Context ctx;
     private BebopDrone mBebopDrone;
@@ -24,24 +24,16 @@ public class LandController {
         this.mBebopDrone = mBebopDrone;
     }
 
-    public boolean isLandToQrCodeEnabled() {
-        return landToQrCodeEnabled;
+    public boolean isLockToQrCodeEnabled() {
+        return lockToQrCodeEnabled;
     }
 
-    public void setLandToQrCodeEnabled(boolean landToQrCodeEnabled) {
-        this.landToQrCodeEnabled = landToQrCodeEnabled;
-    }
-
-    public boolean isHasLanded() {
-        return hasLanded;
-    }
-
-    public void setHasLanded(boolean hasLanded) {
-        this.hasLanded = hasLanded;
+    public void setLockToQrCodeEnabled(boolean lockToQrCodeEnabled) {
+        this.lockToQrCodeEnabled = lockToQrCodeEnabled;
     }
 
     public boolean isLandingEnabled(){
-        return landToQrCodeEnabled && !hasLanded;
+        return lockToQrCodeEnabled && !landingConditionsSatisfied;
     }
 
     public void landToLandingPattern(boolean landWidth, boolean landHeight, boolean landRotation, boolean landVertical){
@@ -51,8 +43,16 @@ public class LandController {
             if (mBebopDrone.getFlyingState() == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING
                     || mBebopDrone.getFlyingState() == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING) {
                 mBebopDrone.land();
-                hasLanded = true;
+                setLandingConditionsSatisfied(true);
             }
         }
+    }
+
+    public boolean isLandingConditionsSatisfied() {
+        return landingConditionsSatisfied;
+    }
+
+    public void setLandingConditionsSatisfied(boolean landingConditionsSatisfied) {
+        this.landingConditionsSatisfied = landingConditionsSatisfied;
     }
 }

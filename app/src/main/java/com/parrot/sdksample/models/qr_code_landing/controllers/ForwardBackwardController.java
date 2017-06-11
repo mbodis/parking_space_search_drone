@@ -13,6 +13,8 @@ import com.parrot.sdksample.models.landing.iface.MoveControllerIface;
 
 public class ForwardBackwardController extends MoveControllerIface {
 
+    private static final boolean LOCAL_DEBUG = false;
+
     private static final long TS_FORWARD_BACKWARD_MOVE = TS_COMMON_MOVE;
     private static final long TS_FORWARD_BACKWARD_PAUSE = TS_COMMON_PAUSE;
 
@@ -55,7 +57,7 @@ public class ForwardBackwardController extends MoveControllerIface {
             }
 
             if (centerHeight < FORWARD_BACKWARD_LIMIT_PERCENTAGE_TOP_FAR) {
-                BebopActivity.addTextLogIntent(ctx, "move forward -> startFAR " + (int) centerHeight);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move forward -> startFAR " + (int) centerHeight);
                 mBebopDrone.setPitch((byte) SPEED_FORWARD_BACKWARD_FAST);
                 mBebopDrone.setFlag((byte) 1);
                 forwardBackward = true;
@@ -64,7 +66,7 @@ public class ForwardBackwardController extends MoveControllerIface {
                 forwardBackwardDirection = DIRECTION_FORWARD;
 
             } else if (centerHeight < FORWARD_BACKWARD_LIMIT_PERCENTAGE_TOP) {
-                BebopActivity.addTextLogIntent(ctx, "move forward -> start " + (int) centerHeight);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move forward -> start " + (int) centerHeight);
                 mBebopDrone.setPitch((byte) SPEED_FORWARD_BACKWARD_NORMAL);
                 mBebopDrone.setFlag((byte) 1);
                 forwardBackward = true;
@@ -82,7 +84,7 @@ public class ForwardBackwardController extends MoveControllerIface {
 //                forwardBackwardDirection = DIRECTION_FORWARD;
 
             } else if (centerHeight > FORWARD_BACKWARD_LIMIT_PERCENTAGE_BOTTOM) {
-                BebopActivity.addTextLogIntent(ctx, "move backward -> start " + (int) centerHeight);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move backward -> start " + (int) centerHeight);
                 mBebopDrone.setPitch((byte) -SPEED_FORWARD_BACKWARD_NORMAL);
                 mBebopDrone.setFlag((byte) 1);
                 forwardBackward = true;
@@ -91,7 +93,7 @@ public class ForwardBackwardController extends MoveControllerIface {
                 forwardBackwardDirection = DIRECTION_BACKWARD;
 
             } else if (centerHeight < FORWARD_BACKWARD_LIMIT_PERCENTAGE_CENTER) {
-                BebopActivity.addTextLogIntent(ctx, "move forward -> start slow " + (int) centerHeight);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move forward -> start slow " + (int) centerHeight);
                 mBebopDrone.setPitch((byte) SPEED_FORWARD_BACKWARD_SLOW);
                 mBebopDrone.setFlag((byte) 1);
                 forwardBackward = true;
@@ -100,7 +102,7 @@ public class ForwardBackwardController extends MoveControllerIface {
                 forwardBackwardDirection = DIRECTION_FORWARD;
 
             } else if (centerHeight > FORWARD_BACKWARD_LIMIT_PERCENTAGE_CENTER) {
-                BebopActivity.addTextLogIntent(ctx, "move backward -> start slow " + (int) centerHeight);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move backward -> start slow " + (int) centerHeight);
                 mBebopDrone.setPitch((byte) -SPEED_FORWARD_BACKWARD_SLOW);
                 mBebopDrone.setFlag((byte) 1);
                 forwardBackward = true;
@@ -117,20 +119,24 @@ public class ForwardBackwardController extends MoveControllerIface {
             if (forwardBackwardEndOfMoveTs > 0) {
                 if (System.currentTimeMillis() > forwardBackwardEndOfMoveTs) {
                     forwardBackwardEndOfMoveTs = 0;
-                    if (forwardBackwardDirection == DIRECTION_FORWARD)
-                        BebopActivity.addTextLogIntent(ctx, "move forward << stop");
-                    if (forwardBackwardDirection == DIRECTION_BACKWARD)
-                        BebopActivity.addTextLogIntent(ctx, "move backward << stop");
+                    if (forwardBackwardDirection == DIRECTION_FORWARD) {
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move forward << stop");
+                    }
+                    if (forwardBackwardDirection == DIRECTION_BACKWARD) {
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move backward << stop");
+                    }
                     mBebopDrone.setPitch((byte) 0);
                     mBebopDrone.setFlag((byte) 0);
                 }
             }
             if (System.currentTimeMillis() > forwardBackwardEndOfPauseTs) {
                 forwardBackwardEndOfPauseTs = 0;
-                if (forwardBackwardDirection == DIRECTION_FORWARD)
-                    BebopActivity.addTextLogIntent(ctx, "move forward << stop pause");
-                if (forwardBackwardDirection == DIRECTION_BACKWARD)
-                    BebopActivity.addTextLogIntent(ctx, "move backward << stop pause");
+                if (forwardBackwardDirection == DIRECTION_FORWARD) {
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move forward << stop pause");
+                }
+                if (forwardBackwardDirection == DIRECTION_BACKWARD) {
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move backward << stop pause");
+                }
                 forwardBackward = false;
             }
         }

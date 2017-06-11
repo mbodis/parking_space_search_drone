@@ -12,11 +12,11 @@ public class DroneMoveRotateLeft extends MoveActionIface {
     public static final String TAG = DroneMoveRotateLeft.class.getName();
 
     public DroneMoveRotateLeft(int speed, int durationMilis) {
-        super(MoveActionIface.DIRECTION_ROTATE_LEFT, speed, durationMilis);
+        super("MoveRotateLeft", MoveActionIface.DIRECTION_ROTATE_LEFT, speed, durationMilis);
     }
 
     public DroneMoveRotateLeft(int durationMilis) {
-        super(MoveActionIface.DIRECTION_ROTATE_LEFT, MoveActionIface.SPEED_NORMAL, durationMilis);
+        super("MoveRotateLeft", MoveActionIface.DIRECTION_ROTATE_LEFT, MoveActionIface.SPEED_NORMAL, durationMilis);
     }
 
     @Override

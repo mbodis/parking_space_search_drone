@@ -13,6 +13,8 @@ import com.parrot.sdksample.models.landing.iface.MoveControllerIface;
 
 public class RotationController extends MoveControllerIface {
 
+    private static final boolean LOCAL_DEBUG = false;
+
     private static final long TS_ROTATE_MOVE = TS_COMMON_MOVE;
     private static final long TS_ROTATE_PAUSE = TS_COMMON_PAUSE;
 
@@ -53,7 +55,7 @@ public class RotationController extends MoveControllerIface {
             }
 
             if (horizontalShiftPx > ROTATE_LIMIT_PERCENTAGE_HIGH_FAR) {
-                BebopActivity.addTextLogIntent(ctx, "rotate clockwise -> startFAST " + horizontalShiftPx);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "rotate clockwise -> startFAST " + horizontalShiftPx);
                 mBebopDrone.setYaw((byte) SPEED_ROTATION_FAST);
                 rotate = true;
                 rotateEndMoveTs = System.currentTimeMillis() + TS_ROTATE_MOVE;
@@ -61,7 +63,7 @@ public class RotationController extends MoveControllerIface {
                 rotateDirection = DIRECTION_CLOCKWISE;
 
             }else if (horizontalShiftPx > ROTATE_LIMIT_PERCENTAGE_HIGH) {
-                BebopActivity.addTextLogIntent(ctx, "rotate clockwise -> start " + horizontalShiftPx);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "rotate clockwise -> start " + horizontalShiftPx);
                 mBebopDrone.setYaw((byte) SPEED_ROTATION_NORMAL);
                 rotate = true;
                 rotateEndMoveTs = System.currentTimeMillis() + TS_ROTATE_MOVE;
@@ -69,7 +71,7 @@ public class RotationController extends MoveControllerIface {
                 rotateDirection = DIRECTION_CLOCKWISE;
 
             } else if (horizontalShiftPx < -ROTATE_LIMIT_PERCENTAGE_HIGH_FAR) {
-                BebopActivity.addTextLogIntent(ctx, "rotate counter clockwise -> startFAST " + horizontalShiftPx);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "rotate counter clockwise -> startFAST " + horizontalShiftPx);
                 mBebopDrone.setYaw((byte) -SPEED_ROTATION_FAST);
                 rotate = true;
                 rotateEndMoveTs = System.currentTimeMillis() + TS_ROTATE_MOVE;
@@ -77,7 +79,7 @@ public class RotationController extends MoveControllerIface {
                 rotateDirection = DIRECTION_COUNTER_CLOCKWISE;
 
             } else if (horizontalShiftPx < -ROTATE_LIMIT_PERCENTAGE_HIGH) {
-                BebopActivity.addTextLogIntent(ctx, "rotate counter clockwise -> start " + horizontalShiftPx);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "rotate counter clockwise -> start " + horizontalShiftPx);
                 mBebopDrone.setYaw((byte) -SPEED_ROTATION_NORMAL);
                 rotate = true;
                 rotateEndMoveTs = System.currentTimeMillis() + TS_ROTATE_MOVE;
@@ -85,7 +87,7 @@ public class RotationController extends MoveControllerIface {
                 rotateDirection = DIRECTION_COUNTER_CLOCKWISE;
 
             } else if (horizontalShiftPx > ROTATE_LIMIT_PERCENTAGE_CENTER) {
-                BebopActivity.addTextLogIntent(ctx, "rotate clockwise -> start slow " + horizontalShiftPx);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "rotate clockwise -> start slow " + horizontalShiftPx);
                 mBebopDrone.setYaw((byte) SPEED_ROTATION_SLOW);
                 rotate = true;
                 rotateEndMoveTs = System.currentTimeMillis() + TS_ROTATE_MOVE;
@@ -94,7 +96,7 @@ public class RotationController extends MoveControllerIface {
 
 
             } else if (horizontalShiftPx < ROTATE_LIMIT_PERCENTAGE_CENTER) {
-                BebopActivity.addTextLogIntent(ctx, "rotate counter clockwise -> start slow " + horizontalShiftPx);
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "rotate counter clockwise -> start slow " + horizontalShiftPx);
                 mBebopDrone.setYaw((byte) -SPEED_ROTATION_SLOW);
                 rotate = true;
                 rotateEndMoveTs = System.currentTimeMillis() + TS_ROTATE_MOVE;
@@ -117,19 +119,23 @@ public class RotationController extends MoveControllerIface {
             if (rotateEndMoveTs > 0) {
                 if (System.currentTimeMillis() > rotateEndMoveTs) {
                     rotateEndMoveTs = 0;
-                    if (rotateDirection == DIRECTION_CLOCKWISE)
-                        BebopActivity.addTextLogIntent(ctx, "move clockwise << stop");
-                    if (rotateDirection == DIRECTION_COUNTER_CLOCKWISE)
-                        BebopActivity.addTextLogIntent(ctx, "move counter clockwise << stop");
+                    if (rotateDirection == DIRECTION_CLOCKWISE){
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move clockwise << stop");
+                    }
+                    if (rotateDirection == DIRECTION_COUNTER_CLOCKWISE){
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move counter clockwise << stop");
+                    }
                     mBebopDrone.setYaw((byte) 0);
                 }
             }
             if (System.currentTimeMillis() > rotateEndPauseTs) {
                 rotateEndPauseTs = 0;
-                if (rotateDirection == DIRECTION_CLOCKWISE)
-                    BebopActivity.addTextLogIntent(ctx, "move clockwise << stop pause");
-                if (rotateDirection == DIRECTION_COUNTER_CLOCKWISE)
-                    BebopActivity.addTextLogIntent(ctx, "move counter clockwise << stop pause");
+                if (rotateDirection == DIRECTION_CLOCKWISE){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move clockwise << stop pause");
+                }
+                if (rotateDirection == DIRECTION_COUNTER_CLOCKWISE){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move counter clockwise << stop pause");
+                }
                 rotate = false;
             }
         }

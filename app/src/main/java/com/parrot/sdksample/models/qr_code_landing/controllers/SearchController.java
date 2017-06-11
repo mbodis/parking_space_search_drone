@@ -13,6 +13,8 @@ import com.parrot.sdksample.models.landing.iface.MoveControllerIface;
 
 public class SearchController extends MoveControllerIface {
 
+    private static final boolean LOCAL_DEBUG = false;
+
     public static final int SEARCH_STEP_0_INIT = 0;
     public static final int SEARCH_STEP_1_MOVE_UP = 1;
     public static final int SEARCH_STEP_2_CIRCLE = 2;
@@ -82,7 +84,7 @@ public class SearchController extends MoveControllerIface {
             switch (searchStep) {
                 case SEARCH_STEP_1_MOVE_UP:
                     if (!upDown) {
-                        BebopActivity.addTextLogIntent(ctx, "move up -> start search ");
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move up -> start search ");
                         mBebopDrone.setGaz((byte) (SPEED_UP_DOWN));
                         upDown = true;
                         upDownEndMoveTs = System.currentTimeMillis() + TS_LIMIT_MOVE_UP;
@@ -94,7 +96,7 @@ public class SearchController extends MoveControllerIface {
 
                 case SEARCH_STEP_2_CIRCLE:
                     if (!rotate) {
-                        BebopActivity.addTextLogIntent(ctx, "rotate clockwise -> start search ");
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "rotate clockwise -> start search ");
                         mBebopDrone.setYaw((byte) SPEED_ROTATION);
                         rotate = true;
                         rotateEndMoveTs = System.currentTimeMillis() + 100 * TS_COMMON_MOVE;
@@ -105,7 +107,7 @@ public class SearchController extends MoveControllerIface {
                     break;
 
                 case SEARCH_STEP_3_FAILED:
-                    BebopActivity.addTextLogIntent(ctx, "FAILED TO SEARCH QRcode");
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "FAILED TO SEARCH QRcode");
                     break;
             }
         }
@@ -126,16 +128,18 @@ public class SearchController extends MoveControllerIface {
 
         if (search){
             if (Constants.isQrActive(timestampDetected)){
-                BebopActivity.addTextLogIntent(ctx, "end searching, QR code found");
+                if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "end searching, QR code found");
                 search = false;
                 searchStep = SEARCH_STEP_0_INIT;
                 searchNextStep = 0;
 
                 // stop rotation
-                if (rotateDirection == DIRECTION_CLOCKWISE)
-                    BebopActivity.addTextLogIntent(ctx, "move clockwise << stop search");
-                if (rotateDirection == DIRECTION_COUNTER_CLOCKWISE)
-                    BebopActivity.addTextLogIntent(ctx, "move counter clockwise << stop search");
+                if (rotateDirection == DIRECTION_CLOCKWISE){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move clockwise << stop search");
+                }
+                if (rotateDirection == DIRECTION_COUNTER_CLOCKWISE){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move counter clockwise << stop search");
+                }
                 mBebopDrone.setYaw((byte) 0);
                 rotate = false;
                 rotateEndMoveTs = 0;
@@ -149,19 +153,23 @@ public class SearchController extends MoveControllerIface {
             if (upDownEndMoveTs > 0) {
                 if (System.currentTimeMillis() > upDownEndMoveTs) {
                     upDownEndMoveTs = 0;
-                    if (upDownDirection == DIRECTION_UP)
-                        BebopActivity.addTextLogIntent(ctx, "move up << stop");
-                    if (upDownDirection == DIRECTION_DOWN)
-                        BebopActivity.addTextLogIntent(ctx, "move down << stop");
+                    if (upDownDirection == DIRECTION_UP) {
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move up << stop");
+                    }
+                    if (upDownDirection == DIRECTION_DOWN){
+                        if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move down << stop");
+                    }
                     mBebopDrone.setGaz((byte) 0);
                 }
             }
             if (System.currentTimeMillis() > upDownEndPauseTs) {
                 upDownEndPauseTs = 0;
-                if (upDownDirection == DIRECTION_UP)
-                    BebopActivity.addTextLogIntent(ctx, "move up << stop pause");
-                if (upDownDirection == DIRECTION_DOWN)
-                    BebopActivity.addTextLogIntent(ctx, "move down << stop pause");
+                if (upDownDirection == DIRECTION_UP){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move up << stop pause");
+                }
+                if (upDownDirection == DIRECTION_DOWN){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move down << stop pause");
+                }
                 upDown = false;
             }
         }
@@ -172,19 +180,26 @@ public class SearchController extends MoveControllerIface {
             if (rotateEndMoveTs > 0) {
                 if (System.currentTimeMillis() > rotateEndMoveTs) {
                     rotateEndMoveTs = 0;
-                    if (rotateDirection == DIRECTION_CLOCKWISE)
-                        BebopActivity.addTextLogIntent(ctx, "move clockwise << stop");
-                    if (rotateDirection == DIRECTION_COUNTER_CLOCKWISE)
-                        BebopActivity.addTextLogIntent(ctx, "move counter clockwise << stop");
+                    if (rotateDirection == DIRECTION_CLOCKWISE) {
+                        if (LOCAL_DEBUG)
+                            BebopActivity.addTextLogIntent(ctx, "move clockwise << stop");
+                    }
+                    if (rotateDirection == DIRECTION_COUNTER_CLOCKWISE) {
+                        if (LOCAL_DEBUG)
+                            BebopActivity.addTextLogIntent(ctx, "move counter clockwise << stop");
+                    }
                     mBebopDrone.setYaw((byte) 0);
                 }
             }
             if (System.currentTimeMillis() > rotateEndPauseTs) {
                 rotateEndPauseTs = 0;
-                if (rotateDirection == DIRECTION_CLOCKWISE)
-                    BebopActivity.addTextLogIntent(ctx, "move clockwise << stop pause");
-                if (rotateDirection == DIRECTION_COUNTER_CLOCKWISE)
-                    BebopActivity.addTextLogIntent(ctx, "move counter clockwise << stop pause");
+                if (rotateDirection == DIRECTION_CLOCKWISE) {
+                    if (LOCAL_DEBUG)
+                        BebopActivity.addTextLogIntent(ctx, "move clockwise << stop pause");
+                }
+                if (rotateDirection == DIRECTION_COUNTER_CLOCKWISE){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move counter clockwise << stop pause");
+                }
                 rotate = false;
             }
         }

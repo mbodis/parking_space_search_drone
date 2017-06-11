@@ -29,13 +29,9 @@ public abstract class MoveActionIface extends DroneActionIface {
     protected int direction = DIRECTION_UNDEFINED;
     protected int speed = SPEED_UNDEFINED;
 
-    public MoveActionIface(int direction, int speed, int durationMilis){
+    public MoveActionIface(String actionName, int direction, int speed, int durationMilis){
+        setActionName(actionName);
         this.direction = direction;
-        this.speed = speed;
-        this.durationMilis = durationMilis;
-    }
-
-    public MoveActionIface(int speed, int durationMilis){
         this.speed = speed;
         this.durationMilis = durationMilis;
     }
