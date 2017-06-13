@@ -26,6 +26,7 @@ public class ConditionActionReadQrCodeInstruction extends ConditionActionIface {
     public static final String QR_CODE_MOVE_TYPE_RIGHT = "r";
     public static final String QR_CODE_MOVE_TYPE_UP = "u";
     public static final String QR_CODE_MOVE_TYPE_DOWN = "d";
+    public static final String QR_CODE_MOVE_TYPE_LAND = "land";
 
 
     public ConditionActionReadQrCodeInstruction() {
@@ -116,6 +117,9 @@ public class ConditionActionReadQrCodeInstruction extends ConditionActionIface {
                             return new DroneMoveUp(timeMilis);
                         }else if (moveType.equals(QR_CODE_MOVE_TYPE_DOWN)){
                             return new DroneMoveDown(timeMilis);
+
+                        }else if (moveType.equals(QR_CODE_MOVE_TYPE_LAND)){
+                            return new SimpleActionLand();
                         }
 
                     }

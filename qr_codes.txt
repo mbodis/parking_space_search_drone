@@ -1,0 +1,20 @@
+//FORWARD 2000//
+id:1,fw:2000
+id:2,fw:2000
+
+//BACKWARD 2000//
+id:1,bw:2000
+id:2,bw:2000
+
+//LEFT 2000//
+id:3,l:2000
+id:4,l:2000
+
+//RIGHT 2000//
+id:3,r:2000
+id:4,r:2000
+
+
+
+//LAND 0//
+id:10,land:0
