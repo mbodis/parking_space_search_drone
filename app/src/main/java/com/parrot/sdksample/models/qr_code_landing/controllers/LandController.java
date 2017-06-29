@@ -36,13 +36,21 @@ public class LandController {
         return lockToQrCodeEnabled && !landingConditionsSatisfied;
     }
 
-    public void landToLandingPattern(boolean landWidth, boolean landHeight, boolean landRotation, boolean landVertical){
+    /**
+     * NOTE: landing is executed in "time_move"
+     * @param landWidth
+     * @param landHeight
+     * @param landRotation
+     * @param landVertical
+     * @param landQrCodeRotation
+     */
+    public void landToLandingPattern(boolean landWidth, boolean landHeight, boolean landRotation, boolean landVertical, boolean landQrCodeRotation){
 
         // qr code ir right below drone
-        if (landWidth && landHeight && landRotation && landVertical) {
+        if (landWidth && landHeight && landRotation && landVertical && landQrCodeRotation) {
             if (mBebopDrone.getFlyingState() == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_FLYING
                     || mBebopDrone.getFlyingState() == ARCOMMANDS_ARDRONE3_PILOTINGSTATE_FLYINGSTATECHANGED_STATE_HOVERING) {
-                mBebopDrone.land();
+
                 setLandingConditionsSatisfied(true);
             }
         }

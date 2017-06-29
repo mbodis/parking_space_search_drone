@@ -1,17 +1,25 @@
 package com.parrot.sdksample.models.qr_code_landing.controllers;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.parrot.sdksample.activity.BebopActivity;
 import com.parrot.sdksample.drone.BebopDrone;
 import com.parrot.sdksample.models.landing.Constants;
 import com.parrot.sdksample.models.landing.iface.MoveControllerIface;
+import com.parrot.sdksample.models.qr_code_landing.detector.QrCodeDetector;
+import com.parrot.sdksample.utils.QrCodeRotation;
+
+import static com.parrot.sdksample.models.qr_code_landing.detector.QrCodeDetector.readingLock;
 
 /**
  * Created by mbodis on 5/15/17.
  */
 
 public class RotationController extends MoveControllerIface {
+
+    private static final String TAG = "RotationController";
 
     private static final boolean LOCAL_DEBUG = false;
 
@@ -142,11 +150,24 @@ public class RotationController extends MoveControllerIface {
     }
 
     @Override
+    public void stopMoveImmediately() {
+        if (rotate) {
+            mBebopDrone.setYaw((byte) 0);
+            rotateEndMoveTs = 0;
+            rotateEndPauseTs = 0;
+            rotateDirection = -1;
+            rotate = false;
+            if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move rotation << stop immediately");
+        }
+    }
+
+    @Override
     public boolean satisfyLandCondition() {
 
         double horizontalShiftPx = getError();
         if ((horizontalShiftPx >= 0 && horizontalShiftPx < LIMIT_ROTATION_ERROR) || (
                 (horizontalShiftPx < 0 && horizontalShiftPx > -LIMIT_ROTATION_ERROR)) ) {
+
             return true;
         }
 

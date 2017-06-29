@@ -143,6 +143,19 @@ public class ForwardBackwardController extends MoveControllerIface {
     }
 
     @Override
+    public void stopMoveImmediately() {
+        if (forwardBackward) {
+            mBebopDrone.setPitch((byte) 0);
+            mBebopDrone.setFlag((byte) 0);
+            forwardBackwardEndOfMoveTs = 0;
+            forwardBackwardEndOfPauseTs = 0;
+            forwardBackwardDirection = -1;
+            forwardBackward = false;
+            if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move forward/backward << stop immediately");
+        }
+    }
+
+    @Override
     public double getError(){
         return (double) mLandingPatternQrCode.getCenter().y / Constants.VIDEO_HEIGHT * 100;
     }

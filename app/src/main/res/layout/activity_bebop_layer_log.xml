@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
     android:id="@+id/layer_log"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <ScrollView
@@ -17,8 +17,7 @@
             android:layout_height="wrap_content"
             android:background="@android:color/black"
             android:text="TextView"
-            android:textColor="@android:color/white"
-            android:visibility="gone" />
+            android:textColor="@android:color/white" />
     </ScrollView>
 
     <TextView
@@ -64,4 +63,14 @@
         android:textSize="20dp"
         android:textStyle="bold" />
 
+    <TextView
+        android:id="@+id/landQrCodeRotationTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/landVerticalTv"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:text="landing QR ROTATION"
+        android:textSize="20dp"
+        android:textStyle="bold" />
 </RelativeLayout>

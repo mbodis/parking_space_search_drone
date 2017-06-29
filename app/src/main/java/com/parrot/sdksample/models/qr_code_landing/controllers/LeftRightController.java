@@ -152,6 +152,19 @@ public class LeftRightController extends MoveControllerIface {
     }
 
     @Override
+    public void stopMoveImmediately() {
+        if(leftRight){
+            mBebopDrone.setRoll((byte) 0);
+            mBebopDrone.setFlag((byte) 0);
+            leftRightEndMoveTs = 0;
+            leftRightEndPauseTs = 0;
+            leftRightDirection = -1;
+            leftRight = false;
+            if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move left/right << stop immediately");
+        }
+    }
+
+    @Override
     public boolean satisfyLandCondition() {
         double centerWidth = getError();
 

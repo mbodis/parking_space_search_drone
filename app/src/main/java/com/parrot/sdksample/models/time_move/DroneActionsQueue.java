@@ -81,7 +81,7 @@ public class DroneActionsQueue {
         return isLogicThreadAlive && started;
     }
 
-    public void stop(BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode){
+    public void stop(Context ctx, BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode){
         isLogicThreadAlive = false;
         for (DroneActionIface move : moves) {
             if (move instanceof MoveActionIface) {
@@ -91,7 +91,7 @@ public class DroneActionsQueue {
 
             if (move instanceof ConditionActionIface) {
                 ConditionActionIface mConditionMove = (ConditionActionIface) move;
-                mConditionMove.executeOnMoveEnds(mBebopDrone, mFlyAboveQrCode, this);
+                mConditionMove.executeOnMoveEnds(ctx, mBebopDrone, mFlyAboveQrCode, this);
             }
         }
         moves = new ArrayList<DroneActionIface>();
@@ -172,7 +172,7 @@ public class DroneActionsQueue {
                 // has finished
                 if (mConditionActionIface.isConditionSatisfied(mBebopDrone, mFlyAboveQrCode)) {
                     BebopActivity.addTextLogIntent(ctx, "finish condition - " + move.getActionName());
-                    mConditionActionIface.executeOnMoveEnds(mBebopDrone, mFlyAboveQrCode, this);
+                    mConditionActionIface.executeOnMoveEnds(ctx, mBebopDrone, mFlyAboveQrCode, this);
                     mConditionActionIface.setActionFinished(true);
                 }
 

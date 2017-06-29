@@ -24,6 +24,10 @@ import java.util.UUID;
 
 public class QrCodeDetector extends LandingAreaDetector {
 
+    // TODO find better way ?
+    public static boolean readingLock = false;
+    public static Bitmap lastQrCodeBitmap;
+
     BarcodeDetector detector;
 
     public QrCodeDetector(Context c, LandingPatternLayerView mLandingPatternLayerView) {
@@ -39,7 +43,7 @@ public class QrCodeDetector extends LandingAreaDetector {
     }
 
     @Override
-    protected Barcode doInBackground(
+    protected synchronized Barcode doInBackground(
             Bitmap... params) {
 
         Barcode barcode = null;
@@ -50,6 +54,9 @@ public class QrCodeDetector extends LandingAreaDetector {
             // use only first
             if (barcodeArr.size() > 0){
                 barcode = barcodeArr.valueAt(0);
+                if (!readingLock) {
+                    lastQrCodeBitmap = params[0];
+                }
             }
 
             //for (int index = 0; index < barcodeArr.size(); index++) {

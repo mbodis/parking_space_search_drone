@@ -16,7 +16,7 @@ import com.parrot.sdksample.models.landing.iface.MoveControllerIface;
  */
 public class LandingPatternLostController extends MoveControllerIface {
 
-    private static final boolean LOCAL_DEBUG = false;
+    private static final boolean LOCAL_DEBUG = true;
 
     private static final long TS_LIMIT_QR_SHORT_TIME_MISSING = 500;
 
@@ -105,6 +105,19 @@ public class LandingPatternLostController extends MoveControllerIface {
                 }
                 forwardBackward = false;
             }
+        }
+    }
+
+    @Override
+    public void stopMoveImmediately() {
+        if (forwardBackward) {
+            mBebopDrone.setPitch((byte) 0);
+            mBebopDrone.setFlag((byte) 0);
+            forwardBackward = false;
+            forwardBackwardEndOfMoveTs = 0;
+            forwardBackwardEndOfPauseTs = 0;
+            forwardBackwardDirection = -1;
+            if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move forward/backward << stop immediately");
         }
     }
 

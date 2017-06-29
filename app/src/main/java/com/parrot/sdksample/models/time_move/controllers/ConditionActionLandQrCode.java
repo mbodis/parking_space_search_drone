@@ -1,5 +1,7 @@
 package com.parrot.sdksample.models.time_move.controllers;
 
+import android.content.Context;
+
 import com.parrot.sdksample.drone.BebopDrone;
 import com.parrot.sdksample.models.qr_code_landing.FlyAboveQrCode;
 import com.parrot.sdksample.models.time_move.DroneActionsQueue;
@@ -27,7 +29,7 @@ public class ConditionActionLandQrCode extends ConditionActionIface {
     }
 
     @Override
-    public void executeOnMoveEnds(BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode, DroneActionsQueue droneActionsQueue) {
+    public void executeOnMoveEnds(Context ctx, BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode, DroneActionsQueue droneActionsQueue) {
         // land drone
         mBebopDrone.land();
         // set drone has landed
@@ -36,6 +38,6 @@ public class ConditionActionLandQrCode extends ConditionActionIface {
 
     @Override
     public boolean isConditionSatisfied(BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode) {
-        return mFlyAboveQrCode.mLandController.isLandingConditionsSatisfied();
+        return mFlyAboveQrCode.getLandController().isLandingConditionsSatisfied();
     }
 }

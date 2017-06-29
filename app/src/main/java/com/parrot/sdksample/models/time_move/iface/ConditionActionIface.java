@@ -1,5 +1,7 @@
 package com.parrot.sdksample.models.time_move.iface;
 
+import android.content.Context;
+
 import com.parrot.sdksample.drone.BebopDrone;
 import com.parrot.sdksample.models.qr_code_landing.FlyAboveQrCode;
 import com.parrot.sdksample.models.time_move.DroneActionsQueue;
@@ -19,7 +21,7 @@ public abstract class ConditionActionIface extends DroneActionIface {
 
     public abstract void executeOnMoveStarts(BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode);
     public abstract void executeOnMoveProcess(BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode);
-    public abstract void executeOnMoveEnds(BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode, DroneActionsQueue mDroneActionsQueue);
+    public abstract void executeOnMoveEnds(Context ctx, BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode, DroneActionsQueue mDroneActionsQueue);
 
     public abstract boolean isConditionSatisfied(BebopDrone mBebopDrone, FlyAboveQrCode mFlyAboveQrCode);
 }

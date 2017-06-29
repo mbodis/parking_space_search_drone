@@ -123,6 +123,18 @@ public class UpDownController extends MoveControllerIface {
     }
 
     @Override
+    public void stopMoveImmediately() {
+        if (upDown) {
+            mBebopDrone.setGaz((byte) 0);
+            upDownEndMoveTs = 0;
+            upDownEndPauseTs = 0;
+            upDownDirection = -1;
+            upDown = false;
+            if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move up/down << stop immediately");
+        }
+    }
+
+    @Override
     public double getError() {
         return TwoDimensionalSpace.distTwoPoints(this.mLandingPatternQrCode.getLandingBB()[0], this.mLandingPatternQrCode.getLandingBB()[1]);
     }

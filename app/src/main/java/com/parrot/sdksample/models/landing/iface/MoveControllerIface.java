@@ -40,6 +40,7 @@ public abstract class MoveControllerIface {
     }
     public abstract void executeMove();
     public abstract void endOfMove();
+    public abstract void stopMoveImmediately();
     public abstract boolean satisfyLandCondition();
 
 }

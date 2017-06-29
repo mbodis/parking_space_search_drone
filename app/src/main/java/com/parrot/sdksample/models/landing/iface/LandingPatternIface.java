@@ -56,6 +56,15 @@ public abstract class LandingPatternIface implements Parcelable {
         return landingBB;
     }
 
+    public Point[] getLandingBBPoints() {
+        Point[] p = new Point[4];
+        for (int i=0; i<4; i++){
+            p[i] = new Point(landingBB[i].x, landingBB[i].y);
+        }
+
+        return p;
+    }
+
     public void setLandingBB(MyPoint[] landingBB) {
         this.landingBB = landingBB;
     }

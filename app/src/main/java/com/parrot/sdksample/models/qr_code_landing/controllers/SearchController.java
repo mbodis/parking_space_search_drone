@@ -133,18 +133,49 @@ public class SearchController extends MoveControllerIface {
                 searchStep = SEARCH_STEP_0_INIT;
                 searchNextStep = 0;
 
+                // stop move up
+                mBebopDrone.setGaz((byte) 0);
+                upDown = false;
+                upDownEndMoveTs = 0;
+                upDownEndPauseTs = 0;
+                if (upDownDirection == DIRECTION_UP){
+                    if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move up << stop search");
+                }
+                upDownDirection = -1;
+
+
                 // stop rotation
+                mBebopDrone.setYaw((byte) 0);
+                rotate = false;
+                rotateEndMoveTs = 0;
+                rotateEndPauseTs = 0;
                 if (rotateDirection == DIRECTION_CLOCKWISE){
                     if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move clockwise << stop search");
                 }
                 if (rotateDirection == DIRECTION_COUNTER_CLOCKWISE){
                     if (LOCAL_DEBUG) BebopActivity.addTextLogIntent(ctx, "move counter clockwise << stop search");
                 }
-                mBebopDrone.setYaw((byte) 0);
-                rotate = false;
-                rotateEndMoveTs = 0;
-                rotateEndPauseTs = 0;
+                rotateDirection = -1;
             }
+        }
+    }
+
+    @Override
+    public void stopMoveImmediately() {
+        if (search){
+            searchStep = SEARCH_STEP_0_INIT;
+            search = false;
+            searchNextStep = 0;
+
+            mBebopDrone.setGaz((byte) 0);
+            upDown = false;
+            upDownEndMoveTs = 0;
+            upDownEndPauseTs = 0;
+
+            mBebopDrone.setYaw((byte) 0);
+            rotate = false;
+            rotateEndMoveTs = 0;
+            rotateEndPauseTs = 0;
         }
     }
 

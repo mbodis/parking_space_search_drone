@@ -13,6 +13,7 @@ import com.parrot.sdksample.models.qr_code_landing.controllers.ForwardBackwardCo
 import com.parrot.sdksample.models.qr_code_landing.controllers.LandController;
 import com.parrot.sdksample.models.qr_code_landing.controllers.LandingPatternLostController;
 import com.parrot.sdksample.models.qr_code_landing.controllers.LeftRightController;
+import com.parrot.sdksample.models.qr_code_landing.controllers.QrCodeRotation;
 import com.parrot.sdksample.models.qr_code_landing.controllers.RotationController;
 import com.parrot.sdksample.models.qr_code_landing.controllers.SearchController;
 import com.parrot.sdksample.models.qr_code_landing.controllers.UpDownController;
@@ -34,13 +35,14 @@ public class FlyAboveQrCode {
     Thread logicThread;
     private LandingPatternQrCode mLandingPatternQrCode;
 
-    ForwardBackwardController mForwardBackwardController;
-    UpDownController mUpDownController;
-    LeftRightController mLeftRightController;
-    RotationController mRotationController;
-    public LandController mLandController;
-    SearchController mSearchController;
-    LandingPatternLostController mLandingPatternLostController;
+    private ForwardBackwardController mForwardBackwardController;
+    private UpDownController mUpDownController;
+    private LeftRightController mLeftRightController;
+    private RotationController mRotationController;
+    private LandController mLandController;
+    private SearchController mSearchController;
+    private LandingPatternLostController mLandingPatternLostController;
+    private QrCodeRotation mQrCodeRotation;
 
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver(){
         @Override
@@ -72,30 +74,52 @@ public class FlyAboveQrCode {
 
                     if (mLandController.isLandingEnabled()) {
 
+                        // no new moves if rotation position for QR-code
+                        if (mQrCodeRotation.isQrCodeRotationProcess()){
+                            mLandingPatternLostController.endOfMove();
+                            mSearchController.endOfMove();
+                            mUpDownController.endOfMove();
+                            mRotationController.endOfMove();
+                            mQrCodeRotation.endOfMove();
+                            mLeftRightController.endOfMove();
+                            mForwardBackwardController.endOfMove();
+                            continue;
+                        }
+
                         mLandingPatternLostController.executeMove();
                         mLandingPatternLostController.endOfMove();
+
                         mSearchController.executeMove();
                         mSearchController.endOfMove();
 
                         mUpDownController.executeMove();
-                        mRotationController.executeMove();
-                        mLeftRightController.executeMove();
-                        mForwardBackwardController.executeMove();
-
                         mUpDownController.endOfMove();
+
+                        mRotationController.executeMove();
                         mRotationController.endOfMove();
+
+                        mLeftRightController.executeMove();
                         mLeftRightController.endOfMove();
+
+                        mForwardBackwardController.executeMove();
                         mForwardBackwardController.endOfMove();
 
                         if (Constants.isQrActive(Constants.getLastTimeQrCodeDetected(mLandingPatternQrCode))) {
-                            if (wasQrCodeDetected()) {
-                                boolean landWidth = mLeftRightController.satisfyLandCondition();
-                                boolean landHeight = mForwardBackwardController.satisfyLandCondition();
-                                boolean landRotation = mRotationController.satisfyLandCondition();
-                                boolean landVertical = mUpDownController.satisfyLandCondition();
-                                mLandController.landToLandingPattern(landWidth, landHeight, landRotation, landVertical);
-                                BebopActivity.sendLandControllerStatus(ctx, landWidth, landHeight, landRotation, landVertical);
+                            boolean landWidth = mLeftRightController.satisfyLandCondition();
+                            boolean landHeight = mForwardBackwardController.satisfyLandCondition();
+                            boolean landRotation = mRotationController.satisfyLandCondition();
+                            boolean landVertical = mUpDownController.satisfyLandCondition();
+                            boolean landQrCodeRotation = false;
+
+                            if (landWidth && landHeight && landRotation && landVertical) {
+                                if (!mQrCodeRotation.isQrCodeRotationProcess()) {
+                                    mQrCodeRotation.executeMove();
+                                }
+                                landQrCodeRotation = mQrCodeRotation.satisfyLandCondition();
                             }
+
+                            mLandController.landToLandingPattern(landWidth, landHeight, landRotation, landVertical, landQrCodeRotation);
+                            BebopActivity.sendLandControllerStatus(ctx, landWidth, landHeight, landRotation, landVertical, landQrCodeRotation);
                         }
 
                     // finish active moves
@@ -104,6 +128,7 @@ public class FlyAboveQrCode {
                         mSearchController.endOfMove();
                         mUpDownController.endOfMove();
                         mRotationController.endOfMove();
+                        mQrCodeRotation.endOfMove();
                         mLeftRightController.endOfMove();
                         mForwardBackwardController.endOfMove();
                     }
@@ -120,25 +145,15 @@ public class FlyAboveQrCode {
         mUpDownController = new UpDownController(ctx, mBebopDrone);
         mLeftRightController = new LeftRightController(ctx, mBebopDrone);
         mRotationController = new RotationController(ctx, mBebopDrone);
+        mQrCodeRotation = new QrCodeRotation(ctx, mBebopDrone);
         mLandController = new LandController(ctx, mBebopDrone);
         mSearchController = new SearchController(ctx, mBebopDrone);
         mLandingPatternLostController = new LandingPatternLostController(ctx, mBebopDrone);
     }
 
-    private boolean wasQrCodeDetected(){
-        return mLandingPatternQrCode != null;
-    }
-
     public void destroy(Context ctx) {
         isLogicThreadAlive = false;
         ctx.unregisterReceiver(mBroadcastReceiver);
-    }
-
-    public long getLastTsQrCode() {
-        if (!wasQrCodeDetected())
-            return 0;
-
-        return mLandingPatternQrCode.getTimestampDetected();
     }
 
     public void setLandingPattern(LandingPatternQrCode mLandingPatternQrCode){
@@ -148,6 +163,7 @@ public class FlyAboveQrCode {
         mUpDownController.updateLandingPattern(mLandingPatternQrCode);
         mLeftRightController.updateLandingPattern(mLandingPatternQrCode);
         mRotationController.updateLandingPattern(mLandingPatternQrCode);
+        mQrCodeRotation.updateLandingPattern(mLandingPatternQrCode);
         mSearchController.updateLandingPattern(mLandingPatternQrCode);
         mLandingPatternLostController.updateLandingPattern(mLandingPatternQrCode);
     }
@@ -176,6 +192,10 @@ public class FlyAboveQrCode {
         Intent mIntent = new Intent(FlyAboveQrCode.ACTION_NEW_QR_CODE_STATUS);
         mIntent.putExtra(FlyAboveQrCode.NEW_QR_CODE_STATUS_KEY, mLandingPatternQrCode);
         ctx.sendBroadcast(mIntent);
+    }
+
+    public LandController getLandController(){
+        return this.mLandController;
     }
 
 }

@@ -75,7 +75,7 @@ public class BebopActivity extends AppCompatActivity {
     private LandingPatternLayerView myLandingPatternLayerView;
 
     private TextView textViewLog, textViewLabelRoll, textViewLabelYaw,
-    landWidthTv, landHeightTv, landRotationTv, landVerticalTv;
+    landWidthTv, landHeightTv, landRotationTv, landVerticalTv, landQrCodeRotationTv;
     private Button mTakeOffLandBt, mDownloadBt, takePictureBt, gazUpBt, gazDownBt,
             yawLeftBt, yawRightBt, forwardBt, backBt, rollLeftBt, rollRightBt, cameraDown,
             cameraCenter, parkPhase1Btn, parkPhase2Btn, parkPhase3Btn, parkPhase4Btn, parkStopBtn, showImgBtn;
@@ -106,7 +106,8 @@ public class BebopActivity extends AppCompatActivity {
                     boolean landHeight = intent.getBooleanExtra("landHeight", false);
                     boolean landRotation = intent.getBooleanExtra("landRotation", false);
                     boolean landVertical = intent.getBooleanExtra("landVertical", false);
-                    setLandingStatus(landWidth, landHeight, landRotation, landVertical);
+                    boolean landQrCodeRotation = intent.getBooleanExtra("landQrCodeRotation", false);
+                    setLandingStatus(landWidth, landHeight, landRotation, landVertical, landQrCodeRotation);
                 }
             }
         }
@@ -248,6 +249,7 @@ public class BebopActivity extends AppCompatActivity {
         landHeightTv = (TextView) findViewById(R.id.landHeightTv);
         landRotationTv = (TextView) findViewById(R.id.landRotationTv);
         landVerticalTv = (TextView) findViewById(R.id.landVerticalTv);
+        landQrCodeRotationTv = (TextView) findViewById(R.id.landQrCodeRotationTv);
 
         // setup text views
         textViewLabelRoll = (TextView) findViewById(R.id.textViewLabelRoll);
@@ -756,12 +758,14 @@ public class BebopActivity extends AppCompatActivity {
         ctx.sendBroadcast(mIntent);
     }
 
-    public static void sendLandControllerStatus(Context ctx, boolean landWidth, boolean landHeight, boolean landRotation, boolean landVertical){
+    public static void sendLandControllerStatus(Context ctx, boolean landWidth, boolean landHeight,
+                                                boolean landRotation, boolean landVertical, boolean landQrCodeRotation){
         Intent mIntent = new Intent(ACTION_LANDING_STATUS);
         mIntent.putExtra("landWidth", landWidth);
         mIntent.putExtra("landHeight", landHeight);
         mIntent.putExtra("landRotation", landRotation);
         mIntent.putExtra("landVertical", landVertical);
+        mIntent.putExtra("landQrCodeRotation", landQrCodeRotation);
         ctx.sendBroadcast(mIntent);
     }
 
@@ -772,13 +776,15 @@ public class BebopActivity extends AppCompatActivity {
         Log.d(TAG, msg);
     }
 
-    private void setLandingStatus(boolean landWidth, boolean landHeight, boolean landRotation, boolean landVertical){
+    private void setLandingStatus(boolean landWidth, boolean landHeight, boolean landRotation,
+                                  boolean landVertical, boolean landQrCodeRotation){
         int red = Color.parseColor("#ff0000");
         int green = Color.parseColor("#00ff00");
         landWidthTv.setTextColor(landWidth ? green : red);
         landHeightTv.setTextColor(landHeight ? green : red);
         landRotationTv.setTextColor(landRotation ? green : red);
         landVerticalTv.setTextColor(landVertical ? green : red);
+        landQrCodeRotationTv.setTextColor(landQrCodeRotation ? green : red);
     }
 
     /**
@@ -837,7 +843,7 @@ public class BebopActivity extends AppCompatActivity {
         List<DroneActionIface> moves = new ArrayList<DroneActionIface>();
         moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_DOWN));
         moves.add(new SimpleActionTakeOff());
-        moves.add(new ConditionActionReadQrCodeInstruction());
+        moves.add(new ConditionActionReadQrCodeInstruction(ConditionActionReadQrCodeInstruction.DEFAULT_TIME_TO_READ_NEW_QR_CODE_INSTRUCTION_MILIS, 4*1000));
         mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mFlyAboveQrCode, moves);
         mDroneActionsQueue.start();
     }
@@ -863,7 +869,7 @@ public class BebopActivity extends AppCompatActivity {
      */
     private boolean stopPhase(){
         if (mDroneActionsQueue != null && mDroneActionsQueue.isInProgress()) {
-            mDroneActionsQueue.stop(mBebopDrone, mFlyAboveQrCode);
+            mDroneActionsQueue.stop(getApplicationContext(), mBebopDrone, mFlyAboveQrCode);
             return true;
         }
 
