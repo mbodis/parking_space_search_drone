@@ -15,7 +15,7 @@
             android:id="@+id/textViewLog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/black"
+            android:background="#77000000"
             android:text="TextView"
             android:textColor="@android:color/white" />
     </ScrollView>
