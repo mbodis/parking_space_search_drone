@@ -41,6 +41,13 @@ public class ConditionActionReadQrCodeInstruction extends ConditionActionIface {
     /**
      * custom time limit
      */
+    public ConditionActionReadQrCodeInstruction(long durationMilis) {
+        super("ReadQrCodeInstruction", durationMilis);
+    }
+
+    /**
+     * custom time limit
+     */
     public ConditionActionReadQrCodeInstruction(long durationMilis, int customTimeMove) {
         super("ReadQrCodeInstruction", durationMilis);
         this.customTimeForMove = customTimeMove;

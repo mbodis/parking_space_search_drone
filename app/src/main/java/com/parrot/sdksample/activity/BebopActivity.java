@@ -843,7 +843,8 @@ public class BebopActivity extends AppCompatActivity {
         List<DroneActionIface> moves = new ArrayList<DroneActionIface>();
         moves.add(new SimpleActionCameraView(SimpleActionCameraView.VIEW_DOWN));
         moves.add(new SimpleActionTakeOff());
-        moves.add(new ConditionActionReadQrCodeInstruction(ConditionActionReadQrCodeInstruction.DEFAULT_TIME_TO_READ_NEW_QR_CODE_INSTRUCTION_MILIS, 4*1000));
+        moves.add(new ConditionActionReadQrCodeInstruction(ConditionActionReadQrCodeInstruction.DEFAULT_TIME_TO_READ_NEW_QR_CODE_INSTRUCTION_MILIS));
+        //moves.add(new ConditionActionReadQrCodeInstruction(ConditionActionReadQrCodeInstruction.DEFAULT_TIME_TO_READ_NEW_QR_CODE_INSTRUCTION_MILIS, 4*1000));
         mDroneActionsQueue = new DroneActionsQueue(getApplicationContext(), mBebopDrone, mFlyAboveQrCode, moves);
         mDroneActionsQueue.start();
     }
